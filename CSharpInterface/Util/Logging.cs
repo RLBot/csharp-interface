@@ -14,7 +14,6 @@ public class Logging : ILogger
     private const string Reset = "\x1b[0m";
 
     private static readonly LogLevel LoggingLevel = LogLevel.Information;
-    private static readonly string AppName = "RLBotServer".PadLeft(12);
 
     private readonly string _name;
     private readonly LogLevel _minLevel;
@@ -51,9 +50,9 @@ public class Logging : ILogger
             var logBuilder = new StringBuilder();
             logBuilder.Append($"{logLevelColors[0]}{DateTime.Now:HH:mm:ss}{Reset} ");
             logBuilder.Append(
-                $"{logLevelColors[1]}{logLevelString}:{Reset}{Green}{AppName}{Reset}"
+                $"{logLevelColors[1]}{logLevelString}:{Reset}{Green}{_name}{Reset}"
             );
-            logBuilder.Append($"{logLevelColors[2]}[ {_name} ]{Reset} ");
+            logBuilder.Append($"{logLevelColors[2]} | {Reset} ");
             logBuilder.Append($"{logLevelColors[3]}{message}{Reset}");
 
             Console.WriteLine(logBuilder.ToString());

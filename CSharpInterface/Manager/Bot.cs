@@ -55,10 +55,8 @@ public abstract class Bot
 
     private void _try_initialize()
     {
-        if (_initializedBot || _hasFieldInfo || _hasPlayerMapping)
-        {
+        if (_initializedBot || !_hasMatchSettings || !_hasFieldInfo || !_hasPlayerMapping)
             return;
-        }
 
         foreach (PlayerConfigurationT player in MatchSettings.PlayerConfigurations)
         {
