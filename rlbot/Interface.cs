@@ -359,7 +359,10 @@ public class Interface
             _running = false;
         }
 
-        Debug.Assert(!_running, "Disconnect request or timeout should have set _running to False");
+        Debug.Assert(
+            !_running,
+            "Disconnect request or timeout should have set _running to False"
+        );
 
         _isConnected = false;
     }

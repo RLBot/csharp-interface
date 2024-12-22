@@ -20,14 +20,14 @@ public class Logging : ILogger
     private readonly string ErrorText = "ERROR".PadLeft(8);
     private readonly string CriticalText = "CRITICAL".PadLeft(8);
     private readonly string UnknownText = "UNKNOWN".PadLeft(8);
-    
+
     private static readonly string[] TraceColors = [Grey, Grey, Grey, Grey];
     private static readonly string[] DebugColors = [Grey, LightBlue, Grey, LightBlue];
     private static readonly string[] InformationColors = [Grey, LightBlue, Grey, LightBlue];
     private static readonly string[] WarningColors = [Yellow, Yellow, Yellow, Yellow];
     private static readonly string[] ErrorColors = [Red, Red, Red, Red];
     private static readonly string[] CriticalColors = [Red, BoldRen, Red, BoldRen];
-    
+
     private static readonly LogLevel LoggingLevel = LogLevel.Information;
 
     private readonly string _name;

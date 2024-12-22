@@ -104,7 +104,13 @@ public abstract class Bot
 
     private void HandleMatchCommunication(MatchCommT matchComm)
     {
-        HandleMatchComm((int)matchComm.Index, (int)matchComm.Team, matchComm.Content, matchComm.Display, matchComm.TeamOnly);
+        HandleMatchComm(
+            (int)matchComm.Index,
+            (int)matchComm.Team,
+            matchComm.Content,
+            matchComm.Display,
+            matchComm.TeamOnly
+        );
     }
 
     public virtual void HandleMatchComm(
