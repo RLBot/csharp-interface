@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
-using rlbot;
-using rlbot.flat;
-using rlbot.Util;
+using RLBot;
+using RLBot.flat;
+using RLBot.Util;
 
 public abstract class Bot
 {
-    public Logging Logger = new Logging("rlbot", LogLevel.Information);
+    public Logging Logger = new("rlbot", LogLevel.Information);
 
     public int Team = -1;
     public int Index = -1;
@@ -35,7 +35,7 @@ public abstract class Bot
             Logger.LogCritical(
                 "Environment variable RLBOT_AGENT_ID is not set and no default agent id is passed to "
                     + "the constructor of the bot. If you are starting your bot manually, please set it "
-                    + "manually, e.g. `RLBOT_AGENT_ID=<agent_id> python yourbot.py`"
+                    + "manually, e.g. `RLBOT_AGENT_ID=<agent_id> dotnet run`"
             );
 
             throw new Exception(
@@ -45,15 +45,15 @@ public abstract class Bot
 
         Logger = new Logging("Bot", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
-        _gameInterface.MatchSettingsHandlers.Add(_handle_match_settings);
-        _gameInterface.FieldInfoHandlers.Add(_handle_field_info);
-        _gameInterface.MatchCommunicationHandlers.Add(_handle_match_communication);
-        _gameInterface.BallPredictionHandlers.Add(_handle_ball_prediction);
-        _gameInterface.ControllableTeamInfoHandlers.Add(_handle_controllable_team_info);
-        _gameInterface.GamePacketHandlers.Add(_handle_game_tick_packet);
+        _gameInterface.MatchSettingsHandlers.Add(HandleMatchSettings);
+        _gameInterface.FieldInfoHandlers.Add(HandleFieldInfo);
+        _gameInterface.MatchCommunicationHandlers.Add(HandleMatchCommunication);
+        _gameInterface.BallPredictionHandlers.Add(HandleBallPrediction);
+        _gameInterface.ControllableTeamInfoHandlers.Add(HandleControllableTeamInfo);
+        _gameInterface.GamePacketHandlers.Add(HandleGamePacket);
     }
 
-    private void _try_initialize()
+    private void TryInitialize()
     {
         if (_initializedBot || !_hasMatchSettings || !_hasFieldInfo || !_hasPlayerMapping)
             return;
@@ -79,7 +79,7 @@ public abstract class Bot
                 Name,
                 e
             );
-            throw;
+            throw new Exception("Failed to initialize bot.", e);
         }
 
         _initializedBot = true;
@@ -88,23 +88,29 @@ public abstract class Bot
 
     public virtual void Initialize() { }
 
-    private void _handle_match_settings(MatchSettingsT matchSettings)
+    private void HandleMatchSettings(MatchSettingsT matchSettings)
     {
         MatchSettings = matchSettings;
         _hasMatchSettings = true;
-        _try_initialize();
+        TryInitialize();
     }
 
-    private void _handle_field_info(FieldInfoT fieldInfo)
+    private void HandleFieldInfo(FieldInfoT fieldInfo)
     {
         FieldInfo = fieldInfo;
         _hasFieldInfo = true;
-        _try_initialize();
+        TryInitialize();
     }
 
-    private void _handle_match_communication(MatchCommT matchComm)
+    private void HandleMatchCommunication(MatchCommT matchComm)
     {
-        Logger.LogInformation("Match communication received");
+        HandleMatchComm(
+            (int)matchComm.Index,
+            (int)matchComm.Team,
+            matchComm.Content,
+            matchComm.Display,
+            matchComm.TeamOnly
+        );
     }
 
     public virtual void HandleMatchComm(
@@ -135,12 +141,12 @@ public abstract class Bot
         );
     }
 
-    private void _handle_ball_prediction(BallPredictionT ballPrediction)
+    private void HandleBallPrediction(BallPredictionT ballPrediction)
     {
         _latestPrediction = ballPrediction;
     }
 
-    private void _handle_controllable_team_info(ControllableTeamInfoT controllableTeamInfo)
+    private void HandleControllableTeamInfo(ControllableTeamInfoT controllableTeamInfo)
     {
         Team = (int)controllableTeamInfo.Team;
         var controllable = controllableTeamInfo.Controllables[0];
@@ -148,15 +154,15 @@ public abstract class Bot
         SpawnId = controllable.SpawnId;
         _hasPlayerMapping = true;
 
-        _try_initialize();
+        TryInitialize();
     }
 
-    private void _handle_game_tick_packet(GamePacketT gamePacket)
+    private void HandleGamePacket(GamePacketT gamePacket)
     {
         _latestPacket = gamePacket;
     }
 
-    private void _packetProcessor(GamePacketT packet)
+    private void ProcessPacket(GamePacketT packet)
     {
         if (packet.Players.Count <= Index)
         {
@@ -211,7 +217,7 @@ public abstract class Bot
 
                 if (_latestPacket is not null && running)
                 {
-                    _packetProcessor(_latestPacket);
+                    ProcessPacket(_latestPacket);
                     _latestPacket = null;
                 }
             }

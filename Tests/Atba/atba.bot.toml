@@ -1,6 +1,6 @@
 [settings]
 # A unique string identifying this type of bot, typically on the form "<developer>/<botname>"
-agent_id = "community/csharp_atba"
+agent_id = "test/csharp_atba"
 # The name that will be displayed in game
 name = "v5 C# ATBA"
 # Path to loadout config from runner

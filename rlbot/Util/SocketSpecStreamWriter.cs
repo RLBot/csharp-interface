@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace rlbot.Util;
+namespace RLBot.Util;
 
 /**
  * Communicates with bots and scripts over TCP according to the spec

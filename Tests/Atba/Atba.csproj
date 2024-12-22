@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CSharpInterface\CSharpInterface.csproj" />
+    <ProjectReference Include="..\..\RLBot\RLBot.csproj" />
   </ItemGroup>
 
 </Project>

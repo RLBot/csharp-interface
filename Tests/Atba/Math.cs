@@ -1,4 +1,4 @@
-using rlbot.flat;
+using RLBot.flat;
 
 namespace MyBot.Math;
 
@@ -29,9 +29,9 @@ public struct Vec2
         return new Vec2(a.X - b.X, a.Y - b.Y);
     }
 
-    public float correctionTo(Vec2 ideal)
+    public float SteerTo(Vec2 ideal)
     {
-        // The in-game axes are left handed, so use -x
+        // The in-game axes are left-handed, so use -x
         float currentInRadians = MathF.Atan2(Y, -X);
         float idealInRadians = MathF.Atan2(ideal.Y, -ideal.X);
 
@@ -45,7 +45,7 @@ public struct Vec2
                 correction -= 2 * MathF.PI;
         }
 
-        return correction;
+        return -correction;
     }
 }
 

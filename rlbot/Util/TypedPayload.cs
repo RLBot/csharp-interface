@@ -1,6 +1,6 @@
 using Google.FlatBuffers;
 
-namespace rlbot.Util;
+namespace RLBot.Util;
 
 public class TypedPayload
 {
