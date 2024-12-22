@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
-namespace CSharpInterface.Util;
+namespace rlbot.Util;
 
 /**
  * Communicates with bots and scripts over TCP according to the spec

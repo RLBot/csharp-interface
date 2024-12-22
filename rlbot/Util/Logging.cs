@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace CSharpInterface.Util;
+namespace rlbot.Util;
 
 public class Logging : ILogger
 {

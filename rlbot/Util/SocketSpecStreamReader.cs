@@ -1,6 +1,6 @@
 using System.Net.Sockets;
 
-namespace CSharpInterface.Util;
+namespace rlbot.Util;
 
 /**
  * https://wiki.rlbot.org/framework/sockets-specification/

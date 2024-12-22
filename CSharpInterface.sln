@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpInterface", "CSharpInterface\CSharpInterface.csproj", "{C947E90B-9048-4965-89F4-C5F85D73E3DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rlbot", "rlbot\rlbot.csproj", "{C947E90B-9048-4965-89F4-C5F85D73E3DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6371B27A-D601-40C4-A601-88C767A8D21B}"
 EndProject

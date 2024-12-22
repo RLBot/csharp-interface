@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
+    <OutputType>Library</OutputType>
+    <RootNamespace>rlbot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

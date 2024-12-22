@@ -1,6 +1,6 @@
-﻿using Google.FlatBuffers;
+using Google.FlatBuffers;
 
-namespace CSharpInterface.Util;
+namespace rlbot.Util;
 
 public class TypedPayload
 {

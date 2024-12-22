@@ -1,11 +1,11 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
-using CSharpInterface.Util;
 using Google.FlatBuffers;
 using Microsoft.Extensions.Logging;
 using rlbot.flat;
+using rlbot.Util;
 
-namespace CSharpInterface;
+namespace rlbot;
 
 public class Interface
 {
