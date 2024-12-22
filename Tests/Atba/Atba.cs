@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MyBot.Math;
-using rlbot.flat;
+using RLBot.flat;
 
 Atba bot = new();
 bot.Run();
@@ -8,7 +8,7 @@ bot.Run();
 class Atba : Bot
 {
     public Atba()
-        : base("community/csharp_atba") { }
+        : base("test/csharp_atba") { }
 
     public override void Initialize()
     {
@@ -36,9 +36,9 @@ class Atba : Bot
         Vec2 carDirection = myCar.GetCarFacingVector();
         Vec2 carToBall = ballLocation - carLocation;
 
-        float steerCorrectionRadius = carDirection.correctionTo(carToBall);
+        float steerCorrection = carDirection.SteerTo(carToBall);
 
-        controller.Steer = -steerCorrectionRadius;
+        controller.Steer = steerCorrection;
         controller.Throttle = 1;
 
         return controller;

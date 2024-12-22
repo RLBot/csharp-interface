@@ -1,4 +1,4 @@
-namespace rlbot.Util;
+namespace RLBot.Util;
 
 /**
  * https://wiki.rlbot.org/framework/sockets-specification/#data-types

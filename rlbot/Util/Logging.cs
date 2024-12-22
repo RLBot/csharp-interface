@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace rlbot.Util;
+namespace RLBot.Util;
 
 public class Logging : ILogger
 {
@@ -13,11 +13,26 @@ public class Logging : ILogger
     private const string BoldRen = "\x1b[31;1m";
     private const string Reset = "\x1b[0m";
 
+    private readonly string TraceText = "TRACE".PadLeft(8);
+    private readonly string DebugText = "DEBUG".PadLeft(8);
+    private readonly string InfoText = "INFO".PadLeft(8);
+    private readonly string WarningText = "WARNING".PadLeft(8);
+    private readonly string ErrorText = "ERROR".PadLeft(8);
+    private readonly string CriticalText = "CRITICAL".PadLeft(8);
+    private readonly string UnknownText = "UNKNOWN".PadLeft(8);
+    
+    private static readonly string[] TraceColors = [Grey, Grey, Grey, Grey];
+    private static readonly string[] DebugColors = [Grey, LightBlue, Grey, LightBlue];
+    private static readonly string[] InformationColors = [Grey, LightBlue, Grey, LightBlue];
+    private static readonly string[] WarningColors = [Yellow, Yellow, Yellow, Yellow];
+    private static readonly string[] ErrorColors = [Red, Red, Red, Red];
+    private static readonly string[] CriticalColors = [Red, BoldRen, Red, BoldRen];
+    
     private static readonly LogLevel LoggingLevel = LogLevel.Information;
 
     private readonly string _name;
     private readonly LogLevel _minLevel;
-    private static readonly object _lock = new object();
+    private static readonly object _lock = new();
 
     public Logging(string name, LogLevel minLevel)
     {
@@ -62,25 +77,25 @@ public class Logging : ILogger
     private string[] GetLogLevelColors(LogLevel logLevel) =>
         logLevel switch
         {
-            LogLevel.Trace => new[] { Grey, Grey, Grey, Grey },
-            LogLevel.Debug => new[] { Grey, LightBlue, Grey, LightBlue },
-            LogLevel.Information => new[] { Grey, LightBlue, Grey, LightBlue },
-            LogLevel.Warning => new[] { Yellow, Yellow, Yellow, Yellow },
-            LogLevel.Error => new[] { Red, Red, Red, Red },
-            LogLevel.Critical => new[] { Red, BoldRen, Red, BoldRen },
-            _ => new[] { Grey, Grey, Grey, Grey },
+            LogLevel.Trace => TraceColors,
+            LogLevel.Debug => DebugColors,
+            LogLevel.Information => InformationColors,
+            LogLevel.Warning => WarningColors,
+            LogLevel.Error => ErrorColors,
+            LogLevel.Critical => CriticalColors,
+            _ => TraceColors,
         };
 
     private string GetLogLevelString(LogLevel logLevel) =>
         logLevel switch
         {
-            LogLevel.Trace => "TRACE".PadLeft(8),
-            LogLevel.Debug => "DEBUG".PadLeft(8),
-            LogLevel.Information => "INFO".PadLeft(8),
-            LogLevel.Warning => "WARNING".PadLeft(8),
-            LogLevel.Error => "ERROR".PadLeft(8),
-            LogLevel.Critical => "CRITICAL".PadLeft(8),
-            _ => "UNKNOWN".PadLeft(8),
+            LogLevel.Trace => TraceText,
+            LogLevel.Debug => DebugText,
+            LogLevel.Information => InfoText,
+            LogLevel.Warning => WarningText,
+            LogLevel.Error => ErrorText,
+            LogLevel.Critical => CriticalText,
+            _ => UnknownText,
         };
 
     public class CustomConsoleLoggerProvider : ILoggerProvider

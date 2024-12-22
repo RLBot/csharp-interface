@@ -1,21 +1,22 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Google.FlatBuffers;
 using Microsoft.Extensions.Logging;
-using rlbot.flat;
-using rlbot.Util;
+using RLBot.flat;
+using RLBot.Util;
 
-namespace rlbot;
+namespace RLBot;
 
 public class Interface
 {
-    private bool _is_connected = false;
+    private bool _isConnected = false;
     private bool _running = false;
     private FlatBufferBuilder _flatBufferBuilder = new(1024);
 
     private readonly int _connectionTimeout;
     private readonly Logging _logger;
-    private readonly TcpClient _client = new TcpClient();
+    private readonly TcpClient _client = new();
     private SocketSpecStreamReader? _socketSpecReader;
     private SocketSpecStreamWriter? _socketSpecWriter;
 
@@ -67,24 +68,24 @@ public class Interface
         _socketSpecWriter.Send();
     }
 
-    public void SendSetLoadout(SetLoadoutT set_loadout)
+    public void SendSetLoadout(SetLoadoutT setLoadout)
     {
         _flatBufferBuilder.Clear();
-        var offset = SetLoadout.Pack(_flatBufferBuilder, set_loadout);
+        var offset = SetLoadout.Pack(_flatBufferBuilder, setLoadout);
         SendFlatBuffer(DataType.SetLoadout, offset);
     }
 
-    public void SendMatchComm(MatchCommT match_comm)
+    public void SendMatchComm(MatchCommT matchComm)
     {
         _flatBufferBuilder.Clear();
-        var offset = MatchComm.Pack(_flatBufferBuilder, match_comm);
+        var offset = MatchComm.Pack(_flatBufferBuilder, matchComm);
         SendFlatBuffer(DataType.MatchComms, offset);
     }
 
-    public void SendPlayerInput(PlayerInputT player_input)
+    public void SendPlayerInput(PlayerInputT playerInput)
     {
         _flatBufferBuilder.Clear();
-        var offset = PlayerInput.Pack(_flatBufferBuilder, player_input);
+        var offset = PlayerInput.Pack(_flatBufferBuilder, playerInput);
         SendFlatBuffer(DataType.PlayerInput, offset);
     }
 
@@ -141,7 +142,7 @@ public class Interface
         int rlbotServerPort = 23234
     )
     {
-        if (_is_connected)
+        if (_isConnected)
         {
             throw new Exception("Connection has already been established");
         }
@@ -157,7 +158,7 @@ public class Interface
                 try
                 {
                     _client.Connect(new IPAddress([127, 0, 0, 1]), rlbotServerPort);
-                    _is_connected = true;
+                    _isConnected = true;
                     break;
                 }
                 catch (SocketException e)
@@ -181,7 +182,7 @@ public class Interface
                 }
             }
 
-            if (!_is_connected)
+            if (!_isConnected)
             {
                 throw new SocketException(
                     (int)SocketError.ConnectionRefused,
@@ -237,7 +238,7 @@ public class Interface
 
     public bool HandleIncomingMessages(bool blocking = false)
     {
-        if (!_is_connected)
+        if (!_isConnected)
         {
             throw new Exception("Connection has not been established");
         }
@@ -330,7 +331,7 @@ public class Interface
 
     public void Disconnect()
     {
-        if (!_is_connected)
+        if (!_isConnected)
         {
             _logger.LogWarning("Asked to disconnect but was already disconnected.");
             return;
@@ -358,13 +359,8 @@ public class Interface
             _running = false;
         }
 
-        if (_running)
-        {
-            throw new Exception(
-                "Disconnect request or timeout should have set _running to False"
-            );
-        }
+        Debug.Assert(!_running, "Disconnect request or timeout should have set _running to False");
 
-        _is_connected = false;
+        _isConnected = false;
     }
 }
