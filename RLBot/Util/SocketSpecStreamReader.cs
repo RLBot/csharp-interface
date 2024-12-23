@@ -11,10 +11,8 @@ class SocketSpecStreamReader
     private byte[] _ushortReader = new byte[2];
     private byte[] _payloadReader = new byte[ushort.MaxValue];
 
-    public SocketSpecStreamReader(NetworkStream stream)
-    {
+    public SocketSpecStreamReader(NetworkStream stream) =>
         _bufferedStream = new BufferedStream(stream, 4 + ushort.MaxValue);
-    }
 
     internal TypedPayload ReadOne()
     {
@@ -51,13 +49,9 @@ class SocketSpecStreamReader
         }
     }
 
-    private static DataType ReadDataType(Span<byte> bytes)
-    {
-        return (DataType)((bytes[0] << 8) | bytes[1]);
-    }
+    private static DataType ReadDataType(Span<byte> bytes) =>
+        (DataType)((bytes[0] << 8) | bytes[1]);
 
-    private static ushort ReadPayloadSize(Span<byte> bytes)
-    {
-        return (ushort)((bytes[0] << 8) | bytes[1]);
-    }
+    private static ushort ReadPayloadSize(Span<byte> bytes) =>
+        (ushort)((bytes[0] << 8) | bytes[1]);
 }

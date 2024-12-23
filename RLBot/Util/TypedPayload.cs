@@ -7,9 +7,11 @@ public class TypedPayload
     public DataType Type;
     public ArraySegment<byte> Payload;
 
-    public static TypedPayload FromFlatBufferBuilder(DataType type, FlatBufferBuilder builder)
-    {
-        return new TypedPayload
+    public static TypedPayload FromFlatBufferBuilder(
+        DataType type,
+        FlatBufferBuilder builder
+    ) =>
+        new TypedPayload
         {
             Type = type,
             Payload = builder.DataBuffer.ToArraySegment(
@@ -17,5 +19,4 @@ public class TypedPayload
                 builder.DataBuffer.Length - builder.DataBuffer.Position
             ),
         };
-    }
 }

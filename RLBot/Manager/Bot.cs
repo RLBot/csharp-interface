@@ -102,8 +102,7 @@ public abstract class Bot
         TryInitialize();
     }
 
-    private void HandleMatchCommunication(MatchCommT matchComm)
-    {
+    private void HandleMatchCommunication(MatchCommT matchComm) =>
         HandleMatchComm(
             (int)matchComm.Index,
             (int)matchComm.Team,
@@ -111,7 +110,6 @@ public abstract class Bot
             matchComm.Display,
             matchComm.TeamOnly
         );
-    }
 
     public virtual void HandleMatchComm(
         int Index,
@@ -141,10 +139,8 @@ public abstract class Bot
         );
     }
 
-    private void HandleBallPrediction(BallPredictionT ballPrediction)
-    {
+    private void HandleBallPrediction(BallPredictionT ballPrediction) =>
         _latestPrediction = ballPrediction;
-    }
 
     private void HandleControllableTeamInfo(ControllableTeamInfoT controllableTeamInfo)
     {
@@ -157,10 +153,7 @@ public abstract class Bot
         TryInitialize();
     }
 
-    private void HandleGamePacket(GamePacketT gamePacket)
-    {
-        _latestPacket = gamePacket;
-    }
+    private void HandleGamePacket(GamePacketT gamePacket) => _latestPacket = gamePacket;
 
     private void ProcessPacket(GamePacketT packet)
     {
@@ -231,6 +224,20 @@ public abstract class Bot
         {
             Retire();
         }
+    }
+
+    public void SetLoadout(SetLoadoutT setLoadout) =>
+        _gameInterface.SendSetLoadout(setLoadout);
+
+    public void SetGameState(
+        Dictionary<int, DesiredBallStateT>? balls = null,
+        Dictionary<int, DesiredCarStateT>? cars = null,
+        DesiredGameInfoStateT? gameInfo = null,
+        List<ConsoleCommandT>? commands = null
+    )
+    {
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, gameInfo, commands);
+        _gameInterface.SendGameState(gameState);
     }
 
     public virtual void Retire() { }
