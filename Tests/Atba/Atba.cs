@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MyBot.Math;
-using RLBot.flat;
+using RLBot.Flat;
 
 Atba bot = new();
 bot.Run();
@@ -18,20 +18,20 @@ class Atba : Bot
         Logger.LogInformation($"There are {numBoostPads} boost pads on the field.");
     }
 
-    public override ControllerStateT GetOutput(GamePacketT Packet)
+    public override ControllerStateT GetOutput(GamePacketT packet)
     {
         ControllerStateT controller = new();
 
         if (
-            Packet.GameInfo.GameStatus != GameStatus.Active
-                && Packet.GameInfo.GameStatus != GameStatus.Kickoff
-            || Packet.Balls.Count == 0
+            packet.GameInfo.GameStatus != GameStatus.Active
+                && packet.GameInfo.GameStatus != GameStatus.Kickoff
+            || packet.Balls.Count == 0
         )
             return controller;
 
-        Vec2 ballLocation = new(Packet.Balls[0].Physics.Location);
+        Vec2 ballLocation = new(packet.Balls[0].Physics.Location);
 
-        PlayerInfoT myCar = Packet.Players[Index];
+        PlayerInfoT myCar = packet.Players[Index];
         Vec2 carLocation = new(myCar.Physics.Location);
         Vec2 carDirection = myCar.GetCarFacingVector();
         Vec2 carToBall = ballLocation - carLocation;

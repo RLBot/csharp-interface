@@ -1,20 +1,20 @@
 using Microsoft.Extensions.Logging;
 using RLBot;
-using RLBot.flat;
+using RLBot.Flat;
 using RLBot.Util;
 
 public abstract class Bot
 {
     public Logging Logger = new("rlbot", LogLevel.Information);
 
-    public int Team = -1;
-    public int Index = -1;
-    public string Name = "";
-    public int SpawnId = -1;
+    public int Team { get; private set; } = -1;
+    public int Index { get; private set; } = -1;
+    public string Name { get; private set; } = "";
+    public int SpawnId { get; private set; } = -1;
 
-    public MatchSettingsT MatchSettings = new();
-    public FieldInfoT FieldInfo = new();
-    public BallPredictionT BallPrediction = new();
+    public MatchSettingsT MatchSettings { get; private set; } = new();
+    public FieldInfoT FieldInfo { get; private set; } = new();
+    public BallPredictionT BallPrediction { get; private set; } = new();
 
     private bool _initializedBot = false;
     private bool _hasMatchSettings = false;
@@ -42,15 +42,15 @@ public abstract class Bot
                 "Environment variable RLBOT_AGENT_ID is not set and no default agent id is passed to the constructor of the bot."
             );
         }
-
+        
         Logger = new Logging("Bot", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
-        _gameInterface.MatchSettingsHandlers.Add(HandleMatchSettings);
-        _gameInterface.FieldInfoHandlers.Add(HandleFieldInfo);
-        _gameInterface.MatchCommunicationHandlers.Add(HandleMatchCommunication);
-        _gameInterface.BallPredictionHandlers.Add(HandleBallPrediction);
-        _gameInterface.ControllableTeamInfoHandlers.Add(HandleControllableTeamInfo);
-        _gameInterface.GamePacketHandlers.Add(HandleGamePacket);
+        _gameInterface.OnMatchSettingsCallback += HandleMatchSettings;
+        _gameInterface.OnFieldInfoCallback += HandleFieldInfo;
+        _gameInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
+        _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
+        _gameInterface.OnControllableTeamInfoCallback += HandleControllableTeamInfo;
+        _gameInterface.OnGamePacketCallback += HandleGamePacket;
     }
 
     private void TryInitialize()
@@ -235,5 +235,5 @@ public abstract class Bot
 
     public virtual void Retire() { }
 
-    public abstract ControllerStateT GetOutput(GamePacketT GamePacket);
+    public abstract ControllerStateT GetOutput(GamePacketT packet);
 }

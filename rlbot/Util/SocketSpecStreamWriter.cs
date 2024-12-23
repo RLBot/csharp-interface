@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace RLBot.Util;
 
 /**
- * Communicates with bots and scripts over TCP according to the spec
+ * Communicates with bots and scripts over TCP according to the specification
  * defined at https://wiki.rlbot.org/framework/sockets-specification/
  */
 internal class SocketSpecStreamWriter(Stream stream)
