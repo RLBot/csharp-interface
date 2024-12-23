@@ -63,5 +63,5 @@ dlldata.c
 .idea/
 *.sln.iml
 
-# FlatBuffers
-FlatBuffer/
+# Generated flatbuffers
+RLBot/Flat/

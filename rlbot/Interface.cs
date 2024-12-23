@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Google.FlatBuffers;
 using Microsoft.Extensions.Logging;
-using RLBot.flat;
+using RLBot.Flat;
 using RLBot.Util;
 
 namespace RLBot;
@@ -21,14 +21,14 @@ public class Interface
     private SocketSpecStreamWriter? _socketSpecWriter;
 
     public readonly string AgentId;
-    public List<Action> OnConnectHandlers = new();
-    public List<Action<GamePacketT>> GamePacketHandlers = new();
-    public List<Action<FieldInfoT>> FieldInfoHandlers = new();
-    public List<Action<MatchSettingsT>> MatchSettingsHandlers = new();
-    public List<Action<MatchCommT>> MatchCommunicationHandlers = new();
-    public List<Action<BallPredictionT>> BallPredictionHandlers = new();
-    public List<Action<ControllableTeamInfoT>> ControllableTeamInfoHandlers = new();
-    public List<Action<TypedPayload>> RawHandlers = new();
+    public event Action OnConnectCallback = delegate { };
+    public event Action<GamePacketT> OnGamePacketCallback = delegate { };
+    public event Action<FieldInfoT> OnFieldInfoCallback = delegate { };
+    public event Action<MatchSettingsT> OnMatchSettingsCallback = delegate { };
+    public event Action<MatchCommT> OnMatchCommunicationCallback = delegate { };
+    public event Action<BallPredictionT> OnBallPredictionCallback = delegate { };
+    public event Action<ControllableTeamInfoT> OnControllableTeamInfoCallback = delegate { };
+    public event Action<TypedPayload> OnRawPayloadCallback = delegate { };
 
     public Interface(string agentId, int connectionTimeout = 120, Logging? logger = null)
     {
@@ -50,14 +50,21 @@ public class Interface
     public void SendFlatBuffer<T>(DataType type, Offset<T> offset)
         where T : struct
     {
+        if (!_isConnected)
+        {
+            throw new Exception("Connection has not been established");
+        }
         _flatBufferBuilder.Finish(offset.Value);
-
         _socketSpecWriter!.Write(TypedPayload.FromFlatBufferBuilder(type, _flatBufferBuilder));
         _socketSpecWriter.Send();
     }
 
     public void SendInitComplete()
     {
+        if (!_isConnected)
+        {
+            throw new Exception("Connection has not been established");
+        }
         _socketSpecWriter!.Write(
             new TypedPayload()
             {
@@ -216,8 +223,7 @@ public class Interface
             localIpEndPoint!.Port
         );
 
-        foreach (var handler in OnConnectHandlers)
-            handler();
+        OnConnectCallback();
 
         var flatbuffer = new ConnectionSettingsT
         {
@@ -276,8 +282,7 @@ public class Interface
 
     private bool HandleIncomingMessage(TypedPayload msg)
     {
-        foreach (var handler in RawHandlers)
-            handler(msg);
+        OnRawPayloadCallback(msg);
 
         ByteBuffer byteBuffer = new(msg.Payload.Array, msg.Payload.Offset);
 
@@ -287,39 +292,33 @@ public class Interface
                 return false;
             case DataType.GamePacket:
                 GamePacketT gamePacket = GamePacket.GetRootAsGamePacket(byteBuffer).UnPack();
-                foreach (var handler in GamePacketHandlers)
-                    handler(gamePacket);
+                OnGamePacketCallback(gamePacket);
                 break;
             case DataType.FieldInfo:
                 FieldInfoT fieldInfo = FieldInfo.GetRootAsFieldInfo(byteBuffer).UnPack();
-                foreach (var handler in FieldInfoHandlers)
-                    handler(fieldInfo);
+                OnFieldInfoCallback(fieldInfo);
                 break;
             case DataType.MatchSettings:
                 MatchSettingsT matchSettings = MatchSettings
                     .GetRootAsMatchSettings(byteBuffer)
                     .UnPack();
-                foreach (var handler in MatchSettingsHandlers)
-                    handler(matchSettings);
+                OnMatchSettingsCallback(matchSettings);
                 break;
             case DataType.MatchComms:
                 MatchCommT matchComm = MatchComm.GetRootAsMatchComm(byteBuffer).UnPack();
-                foreach (var handler in MatchCommunicationHandlers)
-                    handler(matchComm);
+                OnMatchCommunicationCallback(matchComm);
                 break;
             case DataType.BallPrediction:
                 BallPredictionT ballPrediction = BallPrediction
                     .GetRootAsBallPrediction(byteBuffer)
                     .UnPack();
-                foreach (var handler in BallPredictionHandlers)
-                    handler(ballPrediction);
+                OnBallPredictionCallback(ballPrediction);
                 break;
             case DataType.ControllableTeamInfo:
                 ControllableTeamInfoT controllableTeamInfo = ControllableTeamInfo
                     .GetRootAsControllableTeamInfo(byteBuffer)
                     .UnPack();
-                foreach (var handler in ControllableTeamInfoHandlers)
-                    handler(controllableTeamInfo);
+                OnControllableTeamInfoCallback(controllableTeamInfo);
                 break;
             default:
                 _logger.LogWarning("Received message of unknown type: {0}", msg.Type);
