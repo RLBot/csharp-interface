@@ -10,7 +10,7 @@ public class Logging : ILogger
     private const string Yellow = "\x1b[33;20m";
     private const string Green = "\x1b[32;20m";
     private const string Red = "\x1b[31;20m";
-    private const string BoldRen = "\x1b[31;1m";
+    private const string BoldRed = "\x1b[31;1m";
     private const string Reset = "\x1b[0m";
 
     private readonly string TraceText = "TRACE".PadLeft(8);
@@ -26,7 +26,7 @@ public class Logging : ILogger
     private static readonly string[] InformationColors = [Grey, LightBlue, Grey, LightBlue];
     private static readonly string[] WarningColors = [Yellow, Yellow, Yellow, Yellow];
     private static readonly string[] ErrorColors = [Red, Red, Red, Red];
-    private static readonly string[] CriticalColors = [Red, BoldRen, Red, BoldRen];
+    private static readonly string[] CriticalColors = [Red, BoldRed, Red, BoldRed];
 
     private static readonly LogLevel LoggingLevel = LogLevel.Information;
 

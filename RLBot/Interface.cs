@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 using RLBot.Flat;
 using RLBot.Util;
 
-namespace RLBot;
-
 public class Interface
 {
+    public const int RLBOT_SERVER_PORT = 23234;
+
     private bool _isConnected = false;
     private bool _running = false;
     private FlatBufferBuilder _flatBufferBuilder = new(1024);
@@ -146,7 +146,7 @@ public class Interface
         bool wantsMatchCommunications,
         bool wantsBallPredictions,
         bool closeAfterMatch = true,
-        int rlbotServerPort = 23234
+        int rlbotServerPort = RLBOT_SERVER_PORT
     )
     {
         if (_isConnected)

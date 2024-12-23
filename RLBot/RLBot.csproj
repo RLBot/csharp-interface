@@ -7,7 +7,15 @@
     <IsAotCompatible>true</IsAotCompatible>
     <OutputType>Library</OutputType>
     <RootNamespace>RLBot</RootNamespace>
+    <PackageVersion>5.0.0-alpha1</PackageVersion>
   </PropertyGroup>
+
+  <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile">
+    <WriteLinesToFile
+      File="Util\VersionInfo.cs"
+      Lines='namespace RLBot.Util%3b public static class VersionInfo { public const string PackageVersion = "$(PackageVersion)"%3b }'
+      Overwrite="true"/>
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Tomlyn" Version="0.17.0" />
