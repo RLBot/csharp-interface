@@ -10,7 +10,7 @@ public class Interface
 {
     public const int RLBOT_SERVER_PORT = 23234;
 
-    private bool _isConnected = false;
+    public bool IsConnected { get; private set; } = false;
     private bool _running = false;
     private FlatBufferBuilder _flatBufferBuilder = new(1024);
 
@@ -50,7 +50,7 @@ public class Interface
     public void SendFlatBuffer<T>(DataType type, Offset<T> offset)
         where T : struct
     {
-        if (!_isConnected)
+        if (!IsConnected)
         {
             throw new Exception("Connection has not been established");
         }
@@ -61,7 +61,7 @@ public class Interface
 
     public void SendInitComplete()
     {
-        if (!_isConnected)
+        if (!IsConnected)
         {
             throw new Exception("Connection has not been established");
         }
@@ -149,7 +149,7 @@ public class Interface
         int rlbotServerPort = RLBOT_SERVER_PORT
     )
     {
-        if (_isConnected)
+        if (IsConnected)
         {
             throw new Exception("Connection has already been established");
         }
@@ -165,7 +165,7 @@ public class Interface
                 try
                 {
                     _client.Connect(new IPAddress([127, 0, 0, 1]), rlbotServerPort);
-                    _isConnected = true;
+                    IsConnected = true;
                     break;
                 }
                 catch (SocketException e)
@@ -189,7 +189,7 @@ public class Interface
                 }
             }
 
-            if (!_isConnected)
+            if (!IsConnected)
             {
                 throw new SocketException(
                     (int)SocketError.ConnectionRefused,
@@ -242,9 +242,35 @@ public class Interface
         _socketSpecWriter.Send();
     }
 
+    public void Run(bool backgroundThread = false)
+    {
+        if (!IsConnected)
+        {
+            throw new Exception("Connection has not been established");
+        }
+
+        if (_running)
+        {
+            throw new Exception("Message handling is already running");
+        }
+
+        if (backgroundThread)
+        {
+            new Thread(() => Run()).Start();
+        }
+        else
+        {
+            _running = true;
+            while (_running && IsConnected)
+                _running = HandleIncomingMessages(blocking: true);
+
+            _running = false;
+        }
+    }
+
     public bool HandleIncomingMessages(bool blocking = false)
     {
-        if (!_isConnected)
+        if (!IsConnected)
         {
             throw new Exception("Connection has not been established");
         }
@@ -330,7 +356,7 @@ public class Interface
 
     public void Disconnect()
     {
-        if (!_isConnected)
+        if (!IsConnected)
         {
             _logger.LogWarning("Asked to disconnect but was already disconnected.");
             return;
@@ -363,6 +389,6 @@ public class Interface
             "Disconnect request or timeout should have set _running to False"
         );
 
-        _isConnected = false;
+        IsConnected = false;
     }
 }

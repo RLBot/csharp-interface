@@ -1,0 +1,18 @@
+[rlbot]
+launcher = "steam"
+auto_start_bots = true
+
+[match]
+game_mode = "Soccer"
+game_map_upk = "Stadium_P"
+
+[mutators]
+match_length = "Unlimited"
+
+[[cars]]
+type = "human"
+team = 0
+
+[[cars]]
+config = "Atba/atba.bot.toml"
+team = 1
