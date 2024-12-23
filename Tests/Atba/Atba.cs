@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using MyBot.Math;
 using RLBot.Flat;
+using RLBot.Manager;
 
 Atba bot = new();
 bot.Run();

@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Logging;
-using RLBot;
 using RLBot.Flat;
 using RLBot.Util;
+
+namespace RLBot.Manager;
 
 public abstract class Bot
 {
