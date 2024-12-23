@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
     <OutputType>Library</OutputType>
-    <RootNamespace>rlbot</RootNamespace>
+    <RootNamespace>RLBot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

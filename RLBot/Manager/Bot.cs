@@ -42,7 +42,7 @@ public abstract class Bot
                 "Environment variable RLBOT_AGENT_ID is not set and no default agent id is passed to the constructor of the bot."
             );
         }
-        
+
         Logger = new Logging("Bot", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
         _gameInterface.OnMatchSettingsCallback += HandleMatchSettings;
