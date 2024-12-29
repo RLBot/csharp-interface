@@ -8,7 +8,7 @@ if (args.Length == 0)
 
 string matchConfigPath = args[0];
 Match matchManager = new();
-matchManager.StartMatch(matchConfigPath, false);
+matchManager.StartMatch(matchConfigPath);
 
 // wait
 Console.WriteLine("\nPress enter to end the match: ");

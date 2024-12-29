@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Atba", "Tests\Atba\Atba.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RunMatch", "Tests\RunMatch\RunMatch.csproj", "{1BEFF791-BA9D-479E-932E-87D2281E7D38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestScript", "Tests\TestScript\TestScript.csproj", "{DC3B6391-0F6C-43B2-92CF-643A7DB8305C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{1BEFF791-BA9D-479E-932E-87D2281E7D38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BEFF791-BA9D-479E-932E-87D2281E7D38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BEFF791-BA9D-479E-932E-87D2281E7D38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC3B6391-0F6C-43B2-92CF-643A7DB8305C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC3B6391-0F6C-43B2-92CF-643A7DB8305C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC3B6391-0F6C-43B2-92CF-643A7DB8305C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC3B6391-0F6C-43B2-92CF-643A7DB8305C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +42,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8F6A46C5-F101-4EE3-8F0F-C912F6577303} = {1662358A-D620-4A96-94F7-D8ECB7F10A05}
 		{1BEFF791-BA9D-479E-932E-87D2281E7D38} = {1662358A-D620-4A96-94F7-D8ECB7F10A05}
+		{DC3B6391-0F6C-43B2-92CF-643A7DB8305C} = {1662358A-D620-4A96-94F7-D8ECB7F10A05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C302D167-7920-4586-BB32-681E36C9B031}
