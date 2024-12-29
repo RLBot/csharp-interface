@@ -14,7 +14,7 @@ static class GameStateExt
         var gameState = new DesiredGameStateT
         {
             GameInfoState = gameInfo,
-            ConsoleCommands = commands,
+            ConsoleCommands = commands ?? new List<ConsoleCommandT>(),
         };
 
         if (balls != null)
@@ -29,6 +29,10 @@ static class GameStateExt
                 )
                 .ToList();
         }
+        else
+        {
+            gameState.BallStates = new List<DesiredBallStateT>();
+        }
 
         if (cars != null)
         {
@@ -40,6 +44,12 @@ static class GameStateExt
                 )
                 .ToList();
         }
+        else
+        {
+            gameState.CarStates = new List<DesiredCarStateT>();
+        }
+
+        gameState.BoostStates = new List<DesiredBoostStateT>();
 
         return gameState;
     }

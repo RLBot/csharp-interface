@@ -108,7 +108,7 @@ public class Match
         }
     }
 
-    public void StartMatch(string settings, bool waitForStart)
+    public void StartMatch(string settings, bool waitForStart = true)
     {
         EnsureGameConnection();
 

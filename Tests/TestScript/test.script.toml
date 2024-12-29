@@ -1,0 +1,14 @@
+﻿[settings]
+agent_id = "test/csharp_script"
+name = "C# script"
+root_dir = ""
+run_command = "dotnet run"
+run_command_linux = "dotnet run"
+
+[details]
+description = "Made possible by RLBot"
+fun_fact = "This is a test script"
+source_link = "https://github.com/RLBot/RLBot"
+developer = "BotMaker"
+language = "C#"
+tags = []

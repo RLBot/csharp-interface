@@ -16,3 +16,6 @@ team = 0
 [[cars]]
 config = "Atba/atba.bot.toml"
 team = 1
+
+[[scripts]]
+config = "TestScript/test.script.toml"
