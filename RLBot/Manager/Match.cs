@@ -134,7 +134,7 @@ public class Match
             _gameInterface.Connect(
                 wantsMatchCommunications: false,
                 wantsBallPredictions: false,
-                closeAfterMatch: false
+                closeBetweenMatches: false
             );
             _gameInterface.Run(backgroundThread: true);
         }

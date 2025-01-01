@@ -145,7 +145,7 @@ public class Interface
     public void Connect(
         bool wantsMatchCommunications,
         bool wantsBallPredictions,
-        bool closeAfterMatch = true,
+        bool closeBetweenMatches = true,
         int rlbotServerPort = RLBOT_SERVER_PORT
     )
     {
@@ -230,7 +230,7 @@ public class Interface
             AgentId = AgentId,
             WantsBallPredictions = wantsBallPredictions,
             WantsComms = wantsMatchCommunications,
-            CloseAfterMatch = closeAfterMatch,
+            CloseBetweenMatches = closeBetweenMatches,
         };
         _flatBufferBuilder.Clear();
         int offset = ConnectionSettings.Pack(_flatBufferBuilder, flatbuffer).Value;
