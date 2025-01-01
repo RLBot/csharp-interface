@@ -63,5 +63,6 @@ dlldata.c
 .idea/
 *.sln.iml
 
-# Generated flatbuffers
+# Generated files
 RLBot/Flat/
+RLBot/Util/VersionInfo.cs
