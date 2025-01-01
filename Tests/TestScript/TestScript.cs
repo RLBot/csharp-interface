@@ -8,8 +8,9 @@ script.Run();
 class TestScript : Script
 {
     private float _next = 10f;
-    
-    public TestScript() : base("test/csharp_script") { }
+
+    public TestScript()
+        : base("test/csharp_script") { }
 
     public override void Initialize()
     {
@@ -18,9 +19,10 @@ class TestScript : Script
 
     public override void HandlePacket(GamePacketT packet)
     {
-        if (packet.GameInfo.SecondsElapsed < _next || packet.Balls.Count == 0) return;
+        if (packet.GameInfo.SecondsElapsed < _next || packet.Balls.Count == 0)
+            return;
 
-        Dictionary<int,DesiredBallStateT> balls = new();
+        Dictionary<int, DesiredBallStateT> balls = new();
         DesiredBallStateT ball = new DesiredBallStateT();
         ball.Physics = new DesiredPhysicsT();
         ball.Physics.Velocity = new Vector3PartialT();

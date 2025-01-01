@@ -10,15 +10,15 @@ public abstract class Script
 
     public int Index { get; private set; }
     public string Name { get; private set; }
-    
+
     public MatchSettingsT MatchSettings { get; private set; } = new();
     public FieldInfoT FieldInfo { get; private set; } = new();
     public BallPredictionT BallPrediction { get; private set; } = new();
-    
+
     private bool _initialized = false;
     private bool _hasMatchSettings = false;
     private bool _hasFieldInfo = false;
-    
+
     private readonly Interface _gameInterface;
     private GamePacketT? _latestPacket;
     private BallPredictionT _latestPrediction = new();
@@ -27,20 +27,20 @@ public abstract class Script
     {
         string? agentId =
             Environment.GetEnvironmentVariable("RLBOT_AGENT_ID") ?? defaultAgentId;
-        
+
         if (agentId is null)
         {
             Logger.LogCritical(
                 "Environment variable RLBOT_AGENT_ID is not set and no default agent id is passed to "
-                + "the constructor of the script. If you are starting your script manually, please set it "
-                + "manually, e.g. `RLBOT_AGENT_ID=<agent_id> dotnet run`"
+                    + "the constructor of the script. If you are starting your script manually, please set it "
+                    + "manually, e.g. `RLBOT_AGENT_ID=<agent_id> dotnet run`"
             );
 
             throw new Exception(
                 "Environment variable RLBOT_AGENT_ID is not set and no default agent id is passed to the constructor of the bot."
             );
         }
-        
+
         Logger = new Logging("Script", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
         _gameInterface.OnMatchSettingsCallback += HandleMatchSettings;
@@ -49,7 +49,7 @@ public abstract class Script
         _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
         _gameInterface.OnGamePacketCallback += HandleGamePacket;
     }
-    
+
     private void TryInitialize()
     {
         if (_initialized || !_hasMatchSettings || !_hasFieldInfo)
@@ -72,9 +72,9 @@ public abstract class Script
         _initialized = true;
         _gameInterface.SendInitComplete();
     }
-    
+
     public virtual void Initialize() { }
-    
+
     private void HandleMatchSettings(MatchSettingsT matchSettings)
     {
         MatchSettings = matchSettings;
@@ -186,7 +186,7 @@ public abstract class Script
             Retire();
         }
     }
-    
+
     public void SetLoadout(SetLoadoutT setLoadout) =>
         _gameInterface.SendSetLoadout(setLoadout);
 
