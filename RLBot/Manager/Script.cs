@@ -11,7 +11,7 @@ public abstract class Script
     public int Index { get; private set; }
     public string Name { get; private set; }
 
-    public MatchSettingsT MatchSettings { get; private set; } = new();
+    public MatchConfigurationT MatchConfig { get; private set; } = new();
     public FieldInfoT FieldInfo { get; private set; } = new();
     public BallPredictionT BallPrediction { get; private set; } = new();
 
@@ -43,7 +43,7 @@ public abstract class Script
 
         Logger = new Logging("Script", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
-        _gameInterface.OnMatchSettingsCallback += HandleMatchSettings;
+        _gameInterface.OnMatchConfigCallback += HandleMatchConfig;
         _gameInterface.OnFieldInfoCallback += HandleFieldInfo;
         _gameInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
         _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
@@ -75,9 +75,9 @@ public abstract class Script
 
     public virtual void Initialize() { }
 
-    private void HandleMatchSettings(MatchSettingsT matchSettings)
+    private void HandleMatchConfig(MatchConfigurationT matchConfig)
     {
-        MatchSettings = matchSettings;
+        MatchConfig = matchConfig;
         _hasMatchSettings = true;
         TryInitialize();
     }
@@ -193,11 +193,12 @@ public abstract class Script
     public void SetGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredGameInfoStateT? gameInfo = null,
+        Dictionary<int, DesiredBoostStateT>? boostPads = null,
+        DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
     {
-        var gameState = GameStateExt.FillDesiredGameState(balls, cars, gameInfo, commands);
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, boostPads, matchInfo, commands);
         _gameInterface.SendGameState(gameState);
     }
 

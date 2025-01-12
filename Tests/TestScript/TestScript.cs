@@ -19,7 +19,7 @@ class TestScript : Script
 
     public override void HandlePacket(GamePacketT packet)
     {
-        if (packet.GameInfo.SecondsElapsed < _next || packet.Balls.Count == 0)
+        if (packet.MatchInfo.SecondsElapsed < _next || packet.Balls.Count == 0)
             return;
 
         Dictionary<int, DesiredBallStateT> balls = new();
@@ -27,10 +27,10 @@ class TestScript : Script
         ball.Physics = new DesiredPhysicsT();
         ball.Physics.Velocity = new Vector3PartialT();
         ball.Physics.Velocity.Y = new FloatT();
-        ball.Physics.Velocity.Y.Val = packet.Balls[0].Physics.Velocity.Y + 400f;
+        ball.Physics.Velocity.Y.Val = packet.Balls[0].Physics.Velocity.Y + 1000f;
         balls.Add(0, ball);
         SetGameState(balls: balls);
 
-        _next = packet.GameInfo.SecondsElapsed + 10f;
+        _next = packet.MatchInfo.SecondsElapsed + 10f;
     }
 }

@@ -1,6 +1,7 @@
 [rlbot]
 launcher = "steam"
 auto_start_bots = true
+enable_rendering = true
 
 [match]
 game_mode = "Soccer"

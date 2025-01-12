@@ -83,17 +83,17 @@ public class Match
     {
         while (
             Packet == null
-            || Packet.GameInfo.GameStatus == GameStatus.Inactive
-            || Packet.GameInfo.GameStatus == GameStatus.Ended
+            || Packet.MatchInfo.MatchPhase == MatchPhase.Inactive
+            || Packet.MatchInfo.MatchPhase == MatchPhase.Ended
         )
             Thread.Sleep(100);
     }
 
-    public void StartMatch(MatchSettingsT settings, bool waitForStart = true)
+    public void StartMatch(MatchConfigurationT config, bool waitForStart = true)
     {
         EnsureGameConnection();
 
-        _gameInterface.StartMatch(settings);
+        _gameInterface.StartMatch(config);
 
         if (!_initialized)
         {
@@ -108,11 +108,11 @@ public class Match
         }
     }
 
-    public void StartMatch(string settings, bool waitForStart = true)
+    public void StartMatch(string configPath, bool waitForStart = true)
     {
         EnsureGameConnection();
 
-        _gameInterface.StartMatch(settings);
+        _gameInterface.StartMatch(configPath);
 
         if (!_initialized)
         {
@@ -143,11 +143,12 @@ public class Match
     public void SetGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredGameInfoStateT? gameInfo = null,
+        Dictionary<int, DesiredBoostStateT>? boostPads = null,
+        DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
     {
-        var gameState = GameStateExt.FillDesiredGameState(balls, cars, gameInfo, commands);
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, boostPads, matchInfo, commands);
         _gameInterface.SendGameState(gameState);
     }
 

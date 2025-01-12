@@ -24,8 +24,8 @@ class Atba : Bot
         ControllerStateT controller = new();
 
         if (
-            packet.GameInfo.GameStatus != GameStatus.Active
-                && packet.GameInfo.GameStatus != GameStatus.Kickoff
+            packet.MatchInfo.MatchPhase != MatchPhase.Active
+                && packet.MatchInfo.MatchPhase != MatchPhase.Kickoff
             || packet.Balls.Count == 0
         )
             return controller;
@@ -41,6 +41,8 @@ class Atba : Bot
 
         controller.Steer = steerCorrection;
         controller.Throttle = 1;
+
+        controller.Jump = packet.MatchInfo.LastSpectated == Index;
 
         return controller;
     }
