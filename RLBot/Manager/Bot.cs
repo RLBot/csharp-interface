@@ -206,17 +206,25 @@ public abstract class Bot
                 rlbotServerPort: rlbotServerPort
             );
 
-            bool running = true;
-            while (running)
+            while (true)
             {
-                running = _gameInterface.HandleIncomingMessages(
+                var res = _gameInterface.HandleIncomingMessages(
                     blocking: _latestPacket is null
                 );
 
-                if (_latestPacket is not null && running)
+                switch (res)
                 {
-                    ProcessPacket(_latestPacket);
-                    _latestPacket = null;
+                    case Interface.MsgHandlingResult.Terminated:
+                        return;
+                    case Interface.MsgHandlingResult.MoreMsgsQueued:
+                        continue;
+                    case Interface.MsgHandlingResult.NoIncomingMsgs:
+                        if (_latestPacket is not null)
+                        {
+                            ProcessPacket(_latestPacket);
+                            _latestPacket = null;
+                        }
+                        continue;
                 }
             }
         }
