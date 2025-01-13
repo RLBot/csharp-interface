@@ -17,6 +17,8 @@ public abstract class Bot
     public FieldInfoT FieldInfo { get; private set; } = new();
     public BallPredictionT BallPrediction { get; private set; } = new();
 
+    public readonly Renderer Renderer;
+
     private bool _initializedBot = false;
     private bool _hasMatchConfig = false;
     private bool _hasFieldInfo = false;
@@ -52,6 +54,8 @@ public abstract class Bot
         _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
         _gameInterface.OnControllableTeamInfoCallback += HandleControllableTeamInfo;
         _gameInterface.OnGamePacketCallback += HandleGamePacket;
+
+        Renderer = new Renderer(_gameInterface);
     }
 
     private void TryInitialize()

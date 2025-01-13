@@ -15,6 +15,8 @@ public abstract class Script
     public FieldInfoT FieldInfo { get; private set; } = new();
     public BallPredictionT BallPrediction { get; private set; } = new();
 
+    public readonly Renderer Renderer;
+    
     private bool _initialized = false;
     private bool _hasMatchSettings = false;
     private bool _hasFieldInfo = false;
@@ -48,6 +50,8 @@ public abstract class Script
         _gameInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
         _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
         _gameInterface.OnGamePacketCallback += HandleGamePacket;
+
+        Renderer = new Renderer(_gameInterface);
     }
 
     private void TryInitialize()
