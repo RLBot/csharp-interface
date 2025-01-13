@@ -13,14 +13,14 @@ public abstract class Bot
     public string Name { get; private set; } = "";
     public int SpawnId { get; private set; } = -1;
 
-    public MatchSettingsT MatchSettings { get; private set; } = new();
+    public MatchConfigurationT MatchConfig { get; private set; } = new();
     public FieldInfoT FieldInfo { get; private set; } = new();
     public BallPredictionT BallPrediction { get; private set; } = new();
 
     public readonly Renderer Renderer;
 
     private bool _initializedBot = false;
-    private bool _hasMatchSettings = false;
+    private bool _hasMatchConfig = false;
     private bool _hasFieldInfo = false;
     private bool _hasPlayerMapping = false;
 
@@ -48,7 +48,7 @@ public abstract class Bot
 
         Logger = new Logging("Bot", LogLevel.Information);
         _gameInterface = new Interface(agentId, logger: Logger);
-        _gameInterface.OnMatchSettingsCallback += HandleMatchSettings;
+        _gameInterface.OnMatchConfigCallback += HandleMatchConfig;
         _gameInterface.OnFieldInfoCallback += HandleFieldInfo;
         _gameInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
         _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
@@ -60,10 +60,10 @@ public abstract class Bot
 
     private void TryInitialize()
     {
-        if (_initializedBot || !_hasMatchSettings || !_hasFieldInfo || !_hasPlayerMapping)
+        if (_initializedBot || !_hasMatchConfig || !_hasFieldInfo || !_hasPlayerMapping)
             return;
 
-        foreach (PlayerConfigurationT player in MatchSettings.PlayerConfigurations)
+        foreach (PlayerConfigurationT player in MatchConfig.PlayerConfigurations)
         {
             if (player.SpawnId == SpawnId)
             {
@@ -93,10 +93,10 @@ public abstract class Bot
 
     public virtual void Initialize() { }
 
-    private void HandleMatchSettings(MatchSettingsT matchSettings)
+    private void HandleMatchConfig(MatchConfigurationT matchConfig)
     {
-        MatchSettings = matchSettings;
-        _hasMatchSettings = true;
+        MatchConfig = matchConfig;
+        _hasMatchConfig = true;
         TryInitialize();
     }
 
@@ -237,11 +237,11 @@ public abstract class Bot
     public void SetGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredGameInfoStateT? gameInfo = null,
+        DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
     {
-        var gameState = GameStateExt.FillDesiredGameState(balls, cars, gameInfo, commands);
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
         _gameInterface.SendGameState(gameState);
     }
 

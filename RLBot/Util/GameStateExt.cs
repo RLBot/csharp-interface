@@ -7,13 +7,13 @@ static class GameStateExt
     public static DesiredGameStateT FillDesiredGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredGameInfoStateT? gameInfo = null,
+        DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
     {
         var gameState = new DesiredGameStateT
         {
-            GameInfoState = gameInfo,
+            MatchInfo = matchInfo,
             ConsoleCommands = commands ?? new List<ConsoleCommandT>(),
         };
 
@@ -48,8 +48,6 @@ static class GameStateExt
         {
             gameState.CarStates = new List<DesiredCarStateT>();
         }
-
-        gameState.BoostStates = new List<DesiredBoostStateT>();
 
         return gameState;
     }

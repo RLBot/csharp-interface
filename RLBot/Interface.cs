@@ -24,7 +24,7 @@ public class Interface
     public event Action OnConnectCallback = delegate { };
     public event Action<GamePacketT> OnGamePacketCallback = delegate { };
     public event Action<FieldInfoT> OnFieldInfoCallback = delegate { };
-    public event Action<MatchSettingsT> OnMatchSettingsCallback = delegate { };
+    public event Action<MatchConfigurationT> OnMatchConfigCallback = delegate { };
     public event Action<MatchCommT> OnMatchCommunicationCallback = delegate { };
     public event Action<BallPredictionT> OnBallPredictionCallback = delegate { };
     public event Action<ControllableTeamInfoT> OnControllableTeamInfoCallback = delegate { };
@@ -126,16 +126,23 @@ public class Interface
         SendFlatBuffer(DataType.StopCommand, offset);
     }
 
-    public void StartMatch(MatchSettingsT matchSettings)
+    public void StartMatch(MatchConfigurationT matchConfig)
     {
         _flatBufferBuilder.Clear();
-        var offset = MatchSettings.Pack(_flatBufferBuilder, matchSettings);
+        var offset = MatchConfiguration.Pack(_flatBufferBuilder, matchConfig);
         SendFlatBuffer(DataType.MatchSettings, offset);
     }
 
-    public void StartMatch(string matchSettingsPath)
+    public void StartMatch(string matchConfigPath)
     {
-        var startCommand = new StartCommandT { ConfigPath = matchSettingsPath };
+        matchConfigPath = Path.GetFullPath(matchConfigPath);
+        if (!Path.Exists(matchConfigPath))
+            throw new FileNotFoundException($"File does not exist: {matchConfigPath}");
+        var attr = File.GetAttributes(matchConfigPath);
+        if (attr.HasFlag(FileAttributes.Directory))
+            throw new ArgumentException($"Expected path to file, but it is a directory: {matchConfigPath}");
+        
+        var startCommand = new StartCommandT { ConfigPath = matchConfigPath };
 
         _flatBufferBuilder.Clear();
         var offset = StartCommand.Pack(_flatBufferBuilder, startCommand);
@@ -325,10 +332,10 @@ public class Interface
                 OnFieldInfoCallback(fieldInfo);
                 break;
             case DataType.MatchSettings:
-                MatchSettingsT matchSettings = MatchSettings
-                    .GetRootAsMatchSettings(byteBuffer)
+                MatchConfigurationT matchSettings = MatchConfiguration
+                    .GetRootAsMatchConfiguration(byteBuffer)
                     .UnPack();
-                OnMatchSettingsCallback(matchSettings);
+                OnMatchConfigCallback(matchSettings);
                 break;
             case DataType.MatchComms:
                 MatchCommT matchComm = MatchComm.GetRootAsMatchComm(byteBuffer).UnPack();
