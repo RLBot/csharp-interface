@@ -2,8 +2,8 @@ using System.Diagnostics;
 using RLBot.Flat;
 using RLBot.Util;
 using Color = System.Drawing.Color;
-using Vector3 = System.Numerics.Vector3;
 using Vector2 = System.Numerics.Vector2;
+using Vector3 = System.Numerics.Vector3;
 
 namespace RLBot.Manager;
 
@@ -48,7 +48,10 @@ public class Renderer(Interface gameInterface)
     /// </param>
     public void Begin(string groupId = DEFAULT_GROUP, Color? color = null)
     {
-        Debug.Assert(!IsRendering, "Renderer::Begin was called twice without Renderer::End in between");
+        Debug.Assert(
+            !IsRendering,
+            "Renderer::Begin was called twice without Renderer::End in between"
+        );
         _groupContent.Clear();
         CurrentGroupId = groupId;
         Color = color ?? Color;
@@ -61,8 +64,15 @@ public class Renderer(Interface gameInterface)
     /// </summary>
     public void End()
     {
-        Debug.Assert(IsRendering, "Renderer::End was called without a call to Renderer::Begin first");
-        var group = new RenderGroupT { Id = CurrentGroupId.GetHashCode(), RenderMessages = _groupContent };
+        Debug.Assert(
+            IsRendering,
+            "Renderer::End was called without a call to Renderer::Begin first"
+        );
+        var group = new RenderGroupT
+        {
+            Id = CurrentGroupId.GetHashCode(),
+            RenderMessages = _groupContent,
+        };
         gameInterface.SendRenderGroup(group);
         IsRendering = false;
     }
@@ -96,8 +106,10 @@ public class Renderer(Interface gameInterface)
     /// <param name="msg">The render message to add</param>
     public void Draw(RenderMessageT msg)
     {
-        Debug.Assert(IsRendering,
-            "Attempting to draw without a render group. Please call Renderer::Begin first and Renderer::End afterwards.");
+        Debug.Assert(
+            IsRendering,
+            "Attempting to draw without a render group. Please call Renderer::Begin first and Renderer::End afterwards."
+        );
         _groupContent.Add(msg);
     }
 
@@ -109,15 +121,19 @@ public class Renderer(Interface gameInterface)
     /// <param name="color">Color of the line. Using <see cref="Color"/> if null.</param>
     public void DrawLine3D(RenderAnchorT start, RenderAnchorT end, Color? color = null)
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromLine3D(new Line3DT
+        Draw(
+            new RenderMessageT
             {
-                Start = start,
-                End = end,
-                Color = (color ?? Color).ToFlatBuf(),
-            })
-        });
+                Variety = RenderTypeUnion.FromLine3D(
+                    new Line3DT
+                    {
+                        Start = start,
+                        End = end,
+                        Color = (color ?? Color).ToFlatBuf(),
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -136,8 +152,11 @@ public class Renderer(Interface gameInterface)
     /// <param name="end">Other end of the line</param>
     /// <param name="color">Color of the line. Using <see cref="Color"/> if null.</param>
     public void DrawLine3D(Vector3 start, Vector3 end, Color? color = null) =>
-        DrawLine3D(new RenderAnchorT { World = start.ToFlatBuf() }, new RenderAnchorT { World = end.ToFlatBuf() },
-            color);
+        DrawLine3D(
+            new RenderAnchorT { World = start.ToFlatBuf() },
+            new RenderAnchorT { World = end.ToFlatBuf() },
+            color
+        );
 
     /// <summary>
     /// Draw a line in 3D space going through the provided points.
@@ -146,14 +165,18 @@ public class Renderer(Interface gameInterface)
     /// <param name="color">Color of the line. Using <see cref="Color"/> if null.</param>
     public void DrawPolyLine3D(IEnumerable<Vector3T> points, Color? color = null)
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromPolyLine3D(new PolyLine3DT
+        Draw(
+            new RenderMessageT
             {
-                Points = points.ToList(),
-                Color = (color ?? Color).ToFlatBuf(),
-            })
-        });
+                Variety = RenderTypeUnion.FromPolyLine3D(
+                    new PolyLine3DT
+                    {
+                        Points = points.ToList(),
+                        Color = (color ?? Color).ToFlatBuf(),
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -176,24 +199,35 @@ public class Renderer(Interface gameInterface)
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
     /// <param name="hAlign">Horizontal alignment.</param>
     /// <param name="vAlign">Vertical alignment.</param>
-    public void DrawText2D(string text, float x, float y, float scale = 1f, Color? foreground = null,
-        Color? background = null, TextHAlign hAlign = TextHAlign.Left,
-        TextVAlign vAlign = TextVAlign.Top)
+    public void DrawText2D(
+        string text,
+        float x,
+        float y,
+        float scale = 1f,
+        Color? foreground = null,
+        Color? background = null,
+        TextHAlign hAlign = TextHAlign.Left,
+        TextVAlign vAlign = TextVAlign.Top
+    )
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromString2D(new String2DT
+        Draw(
+            new RenderMessageT
             {
-                Text = text,
-                X = x,
-                Y = y,
-                Scale = scale,
-                Foreground = (foreground ?? Color).ToFlatBuf(),
-                Background = (background ?? Color.Transparent).ToFlatBuf(),
-                HAlign = hAlign,
-                VAlign = vAlign,
-            })
-        });
+                Variety = RenderTypeUnion.FromString2D(
+                    new String2DT
+                    {
+                        Text = text,
+                        X = x,
+                        Y = y,
+                        Scale = scale,
+                        Foreground = (foreground ?? Color).ToFlatBuf(),
+                        Background = (background ?? Color.Transparent).ToFlatBuf(),
+                        HAlign = hAlign,
+                        VAlign = vAlign,
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -207,10 +241,25 @@ public class Renderer(Interface gameInterface)
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
     /// <param name="hAlign">Horizontal alignment.</param>
     /// <param name="vAlign">Vertical alignment.</param>
-    public void DrawText2D(string text, Vector2 position, float scale = 1f, Color? foreground = null,
-        Color? background = null, TextHAlign hAlign = TextHAlign.Left, TextVAlign vAlign = TextVAlign.Top) =>
-        DrawText2D(text, position.X, position.Y, scale, foreground, background, hAlign,
-            vAlign);
+    public void DrawText2D(
+        string text,
+        Vector2 position,
+        float scale = 1f,
+        Color? foreground = null,
+        Color? background = null,
+        TextHAlign hAlign = TextHAlign.Left,
+        TextVAlign vAlign = TextVAlign.Top
+    ) =>
+        DrawText2D(
+            text,
+            position.X,
+            position.Y,
+            scale,
+            foreground,
+            background,
+            hAlign,
+            vAlign
+        );
 
     /// <summary>
     /// Draw text in 3D space.
@@ -223,23 +272,33 @@ public class Renderer(Interface gameInterface)
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
     /// <param name="hAlign">Horizontal alignment.</param>
     /// <param name="vAlign">Vertical alignment.</param>
-    public void DrawText3D(string text, RenderAnchorT anchor, float scale = 1f, Color? foreground = null,
-        Color? background = null, TextHAlign hAlign = TextHAlign.Left,
-        TextVAlign vAlign = TextVAlign.Top)
+    public void DrawText3D(
+        string text,
+        RenderAnchorT anchor,
+        float scale = 1f,
+        Color? foreground = null,
+        Color? background = null,
+        TextHAlign hAlign = TextHAlign.Left,
+        TextVAlign vAlign = TextVAlign.Top
+    )
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromString3D(new String3DT
+        Draw(
+            new RenderMessageT
             {
-                Text = text,
-                Anchor = anchor,
-                Scale = scale,
-                Foreground = (foreground ?? Color).ToFlatBuf(),
-                Background = (background ?? Color.Transparent).ToFlatBuf(),
-                HAlign = hAlign,
-                VAlign = vAlign,
-            })
-        });
+                Variety = RenderTypeUnion.FromString3D(
+                    new String3DT
+                    {
+                        Text = text,
+                        Anchor = anchor,
+                        Scale = scale,
+                        Foreground = (foreground ?? Color).ToFlatBuf(),
+                        Background = (background ?? Color.Transparent).ToFlatBuf(),
+                        HAlign = hAlign,
+                        VAlign = vAlign,
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -253,10 +312,24 @@ public class Renderer(Interface gameInterface)
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
     /// <param name="hAlign">Horizontal alignment.</param>
     /// <param name="vAlign">Vertical alignment.</param>
-    public void DrawText3D(string text, Vector3 position, float scale = 1f, Color? foreground = null,
-        Color? background = null, TextHAlign hAlign = TextHAlign.Left, TextVAlign vAlign = TextVAlign.Top) =>
-        DrawText3D(text, new RenderAnchorT { World = position.ToFlatBuf() }, scale, foreground, background, hAlign,
-            vAlign);
+    public void DrawText3D(
+        string text,
+        Vector3 position,
+        float scale = 1f,
+        Color? foreground = null,
+        Color? background = null,
+        TextHAlign hAlign = TextHAlign.Left,
+        TextVAlign vAlign = TextVAlign.Top
+    ) =>
+        DrawText3D(
+            text,
+            new RenderAnchorT { World = position.ToFlatBuf() },
+            scale,
+            foreground,
+            background,
+            hAlign,
+            vAlign
+        );
 
     /// <summary>
     /// Draw a rectangle in 2D space.
@@ -268,19 +341,30 @@ public class Renderer(Interface gameInterface)
     /// <param name="height">Height of the rectangle as a fraction of screen-space height.</param>
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
     /// <param name="centered">Whether the rectangle should be centered at (x,y), or if (x,y) is the top left corner.</param>
-    public void DrawRect2D(float x, float y, float width, float height, Color? color = null, bool centered = true)
+    public void DrawRect2D(
+        float x,
+        float y,
+        float width,
+        float height,
+        Color? color = null,
+        bool centered = true
+    )
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromRect2D(new Rect2DT
+        Draw(
+            new RenderMessageT
             {
-                X = x,
-                Y = y,
-                Width = width,
-                Height = height,
-                Color = (color ?? Color).ToFlatBuf(),
-            })
-        });
+                Variety = RenderTypeUnion.FromRect2D(
+                    new Rect2DT
+                    {
+                        X = x,
+                        Y = y,
+                        Width = width,
+                        Height = height,
+                        Color = (color ?? Color).ToFlatBuf(),
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -291,8 +375,12 @@ public class Renderer(Interface gameInterface)
     /// <param name="size">Size of the rectangle using fractions of screen-space size.</param>
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
     /// <param name="centered">Whether the rectangle should be centered at (x,y), or if (x,y) is the top left corner.</param>
-    public void DrawRect2D(Vector2 position, Vector2 size, Color? color = null, bool centered = true) =>
-        DrawRect2D(position.X, position.Y, size.X, size.Y, color, centered);
+    public void DrawRect2D(
+        Vector2 position,
+        Vector2 size,
+        Color? color = null,
+        bool centered = true
+    ) => DrawRect2D(position.X, position.Y, size.X, size.Y, color, centered);
 
     /// <summary>
     /// Draw a rectangle in 3D space.
@@ -303,18 +391,27 @@ public class Renderer(Interface gameInterface)
     /// <param name="width">The width of the rectangle as a fraction of screen-space width.</param>
     /// <param name="height">The height of the rectangle as a fraction of screen-space height.</param>
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
-    public void DrawRect3D(RenderAnchorT anchor, float width, float height, Color? color = null)
+    public void DrawRect3D(
+        RenderAnchorT anchor,
+        float width,
+        float height,
+        Color? color = null
+    )
     {
-        Draw(new RenderMessageT
-        {
-            Variety = RenderTypeUnion.FromRect3D(new Rect3DT
+        Draw(
+            new RenderMessageT
             {
-                Anchor = anchor,
-                Width = width,
-                Height = height,
-                Color = (color ?? Color).ToFlatBuf(),
-            })
-        });
+                Variety = RenderTypeUnion.FromRect3D(
+                    new Rect3DT
+                    {
+                        Anchor = anchor,
+                        Width = width,
+                        Height = height,
+                        Color = (color ?? Color).ToFlatBuf(),
+                    }
+                ),
+            }
+        );
     }
 
     /// <summary>
@@ -327,7 +424,7 @@ public class Renderer(Interface gameInterface)
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
     public void DrawRect3D(RenderAnchorT anchor, Vector2 size, Color? color = null) =>
         DrawRect3D(anchor, size.X, size.Y, color);
-        
+
     /// <summary>
     /// Draw a rectangle in 3D space.
     /// Width and height are screen-space sizes, i.e. 0.1 is 10% of the screen width/height.

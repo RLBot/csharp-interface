@@ -269,13 +269,21 @@ public class Interface
         {
             _running = true;
             while (_running && IsConnected)
-                _running = HandleIncomingMessages(blocking: true);
+                _running =
+                    HandleIncomingMessages(blocking: true) != MsgHandlingResult.Terminated;
 
             _running = false;
         }
     }
 
-    public bool HandleIncomingMessages(bool blocking = false)
+    public enum MsgHandlingResult
+    {
+        Terminated,
+        NoIncomingMsgs,
+        MoreMsgsQueued,
+    }
+
+    public MsgHandlingResult HandleIncomingMessages(bool blocking = false)
     {
         if (!IsConnected)
         {
@@ -290,7 +298,9 @@ public class Interface
 
             try
             {
-                return HandleIncomingMessage(incomingMessage);
+                return HandleIncomingMessage(incomingMessage)
+                    ? MsgHandlingResult.MoreMsgsQueued
+                    : MsgHandlingResult.Terminated;
             }
             catch (Exception e)
             {
@@ -299,17 +309,17 @@ public class Interface
                     incomingMessage.Type,
                     e
                 );
-                return false;
+                return MsgHandlingResult.Terminated;
             }
         }
         catch (SocketException)
         {
-            return true;
+            return MsgHandlingResult.NoIncomingMsgs;
         }
         catch
         {
             _logger.LogError("SocketRelay disconnected unexpectedly!");
-            return false;
+            return MsgHandlingResult.Terminated;
         }
     }
 
