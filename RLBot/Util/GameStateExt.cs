@@ -7,7 +7,6 @@ static class GameStateExt
     public static DesiredGameStateT FillDesiredGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        Dictionary<int, DesiredBoostStateT>? boostPads = null,
         DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
@@ -48,19 +47,6 @@ static class GameStateExt
         else
         {
             gameState.CarStates = new List<DesiredCarStateT>();
-        }
-
-        if (boostPads != null)
-        {
-            var maxEntry = boostPads.Keys.Max();
-            gameState.BoostStates = Enumerable
-                .Range(0, maxEntry + 1)
-                .Select(i => boostPads.TryGetValue(i, out var boostPad) ? boostPad : new DesiredBoostStateT())
-                .ToList();
-        }
-        else
-        {
-            gameState.BoostStates = new List<DesiredBoostStateT>();
         }
 
         return gameState;

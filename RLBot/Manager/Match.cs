@@ -143,12 +143,11 @@ public class Match
     public void SetGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        Dictionary<int, DesiredBoostStateT>? boostPads = null,
         DesiredMatchInfoT? matchInfo = null,
         List<ConsoleCommandT>? commands = null
     )
     {
-        var gameState = GameStateExt.FillDesiredGameState(balls, cars, boostPads, matchInfo, commands);
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
         _gameInterface.SendGameState(gameState);
     }
 
