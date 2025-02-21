@@ -15,8 +15,8 @@ type = "human"
 team = 0
 
 [[cars]]
-config = "Atba/atba.bot.toml"
+config_file = "Atba/atba.bot.toml"
 team = 1
 
 [[scripts]]
-config = "TestScript/test.script.toml"
+config_file = "TestScript/test.script.toml"
