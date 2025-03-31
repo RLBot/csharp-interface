@@ -1,4 +1,4 @@
-﻿[settings]
+[settings]
 agent_id = "test/csharp_script"
 name = "C# script"
 root_dir = ""

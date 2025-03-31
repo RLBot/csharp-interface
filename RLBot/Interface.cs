@@ -140,8 +140,10 @@ public class Interface
             throw new FileNotFoundException($"File does not exist: {matchConfigPath}");
         var attr = File.GetAttributes(matchConfigPath);
         if (attr.HasFlag(FileAttributes.Directory))
-            throw new ArgumentException($"Expected path to file, but it is a directory: {matchConfigPath}");
-        
+            throw new ArgumentException(
+                $"Expected path to file, but it is a directory: {matchConfigPath}"
+            );
+
         var startCommand = new StartCommandT { ConfigPath = matchConfigPath };
 
         _flatBufferBuilder.Clear();

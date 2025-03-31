@@ -1,4 +1,4 @@
-﻿using RLBot.Manager;
+using RLBot.Manager;
 
 if (args.Length == 0)
 {

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.FlatBuffers" Version="24.12.23" />
+    <PackageReference Include="Google.FlatBuffers" Version="25.2.10" />
   </ItemGroup>
 
   <ItemGroup>
