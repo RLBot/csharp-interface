@@ -11,11 +11,16 @@ namespace RLBot.Manager;
 /// A wrapper for RLBot's debug rendering features.
 /// Note that debug rendering must be enabled in the match configuration for debug rendering to show up.
 /// </summary>
-/// <param name="gameInterface">The RLBot interface to use.</param>
-public class Renderer(Interface gameInterface)
+public class Renderer
 {
     /// <summary>Name of the default render group.</summary>
     private const string DEFAULT_GROUP = "DEFAULT";
+
+    private readonly Interface _gameInterface;
+
+    /// <summary>True if rendering is enabled. Note the Renderer will still send render messages if
+    /// draw methods are called, but RLBot will likely ignore the messages.</summary>
+    public bool CanRender { get; private set; } = true;
 
     /// <summary>
     /// True, if a construction of a render group is in progress.
@@ -34,6 +39,13 @@ public class Renderer(Interface gameInterface)
 
     /// <summary>All active render groups. Render groups persist until overriden or cleared.</summary>
     public HashSet<string>.Enumerator ActiveGroupIds => _activeGroupIds.GetEnumerator();
+
+    public Renderer(Interface gameInterface)
+    {
+        _gameInterface = gameInterface;
+        _gameInterface.OnMatchConfigCallback += m => CanRender = m.EnableRendering == DebugRendering.OnByDefault;
+        _gameInterface.OnRenderingStatusCallback += s => CanRender = s.Status;
+    }
 
     /// <summary>
     /// Begin a new render group.
@@ -73,7 +85,7 @@ public class Renderer(Interface gameInterface)
             Id = CurrentGroupId.GetHashCode(),
             RenderMessages = _groupContent,
         };
-        gameInterface.SendRenderGroup(group);
+        _gameInterface.SendRenderGroup(group);
         IsRendering = false;
     }
 
@@ -84,7 +96,7 @@ public class Renderer(Interface gameInterface)
     /// <returns>True, if the group existed.</returns>
     public bool Clear(string groupId = DEFAULT_GROUP)
     {
-        gameInterface.SendRemoveRenderGroup(new() { Id = groupId.GetHashCode() });
+        _gameInterface.SendRemoveRenderGroup(new() { Id = groupId.GetHashCode() });
         return _activeGroupIds.Remove(groupId);
     }
 
@@ -93,7 +105,7 @@ public class Renderer(Interface gameInterface)
     {
         foreach (string id in _activeGroupIds)
         {
-            gameInterface.SendRemoveRenderGroup(new() { Id = id.GetHashCode() });
+            _gameInterface.SendRemoveRenderGroup(new() { Id = id.GetHashCode() });
         }
 
         _activeGroupIds.Clear();

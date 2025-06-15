@@ -1,11 +1,12 @@
 [rlbot]
 launcher = "steam"
-auto_start_bots = true
+auto_start_agents = true
 
 [match]
-game_mode = "Soccer"
+game_mode = "Soccar"
 game_map_upk = "Stadium_P"
 enable_rendering = true
+enable_state_setting = true
 
 [mutators]
 match_length = "Unlimited"

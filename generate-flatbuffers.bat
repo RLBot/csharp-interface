@@ -4,7 +4,7 @@ cd /D "%~dp0"
 
 echo Generating flatbuffers header file...
 
-.\flatbuffers-schema\flatc.exe --csharp --gen-all --gen-object-api --gen-onefile -o .\RLBot\Flat .\flatbuffers-schema\rlbot.fbs
+.\flatbuffers-schema\binaries\flatc.exe --csharp --gen-all --gen-object-api --gen-onefile -o .\RLBot\Flat .\flatbuffers-schema\schema\rlbot.fbs
 
 IF EXIST .\RLBot\Flat\Flat.cs del .\RLBot\Flat\Flat.cs
 

@@ -82,7 +82,23 @@ public abstract class Script
     private void HandleMatchConfig(MatchConfigurationT matchConfig)
     {
         MatchConfig = matchConfig;
-        _hasMatchSettings = true;
+
+        for (int i = 0; i < matchConfig.ScriptConfigurations.Count; i++)
+        {
+            var script = matchConfig.ScriptConfigurations[i];
+            if (script.AgentId == _gameInterface.AgentId)
+            {
+                Index = i;
+                Name = script.Name;
+                _hasMatchSettings = true;
+            }
+        }
+
+        if (!_hasMatchSettings)
+        {
+            Logger.LogWarning("Script with agent id '{}' did not find itself in the match settings", _gameInterface.AgentId);
+        }
+        
         TryInitialize();
     }
 
