@@ -1,57 +1,39 @@
 using System.Net.Sockets;
+using Google.FlatBuffers;
+using RLBot.Flat;
 
 namespace RLBot.Util;
 
 /**
+ * Reads messages to RLBot server according to spec:
  * https://wiki.rlbot.org/framework/sockets-specification/
  */
-class SocketSpecStreamReader
+class SpecStreamReader
 {
     private BufferedStream _bufferedStream;
     private byte[] _ushortReader = new byte[2];
     private byte[] _payloadReader = new byte[ushort.MaxValue];
 
-    public SocketSpecStreamReader(NetworkStream stream) =>
-        _bufferedStream = new BufferedStream(stream, 4 + ushort.MaxValue);
-
-    internal TypedPayload ReadOne()
+    public SpecStreamReader(NetworkStream stream)
     {
-        DataType dataType;
+        _bufferedStream = new BufferedStream(stream, 2 + ushort.MaxValue);
+    }
+
+    /// <summary>Attempt to read an incoming message</summary>
+    /// <exception cref="SocketException">Thrown if there are no incoming messages.</exception>
+    public CorePacket ReadOne()
+    {
         ushort payloadSize;
-
         _bufferedStream.ReadExactly(_ushortReader);
-        dataType = ReadDataType(_ushortReader);
-
-        _bufferedStream.ReadExactly(_ushortReader);
-        payloadSize = ReadPayloadSize(_ushortReader);
-
+        payloadSize = ReadBigEndian(_ushortReader);
         _bufferedStream.ReadExactly(_payloadReader, 0, payloadSize);
-
-        return new() { Type = dataType, Payload = new(_payloadReader, 0, payloadSize) };
+        
+        ByteBuffer byteBuffer = new(_payloadReader, 0);
+        return CorePacket.GetRootAsCorePacket(byteBuffer);
     }
 
-    internal IEnumerable<TypedPayload> ReadAll()
+    private static ushort ReadBigEndian(Span<byte> bytes)
     {
-        while (true)
-        {
-            TypedPayload payload;
-
-            try
-            {
-                payload = ReadOne();
-            }
-            catch (Exception)
-            {
-                break;
-            }
-
-            yield return payload;
-        }
+        return (ushort)((bytes[0] << 8) | bytes[1]);
     }
-
-    private static DataType ReadDataType(Span<byte> bytes) =>
-        (DataType)((bytes[0] << 8) | bytes[1]);
-
-    private static ushort ReadPayloadSize(Span<byte> bytes) =>
-        (ushort)((bytes[0] << 8) | bytes[1]);
 }

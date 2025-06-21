@@ -11,7 +11,7 @@ public abstract class Bot
     public int Team { get; private set; } = -1;
     public int Index { get; private set; } = -1;
     public string Name { get; private set; } = "";
-    public int SpawnId { get; private set; } = -1;
+    public int PlayerId { get; private set; } = -1;
 
     public MatchConfigurationT MatchConfig { get; private set; } = new();
     public FieldInfoT FieldInfo { get; private set; } = new();
@@ -65,9 +65,9 @@ public abstract class Bot
 
         foreach (PlayerConfigurationT player in MatchConfig.PlayerConfigurations)
         {
-            if (player.SpawnId == SpawnId)
+            if (player.PlayerId == PlayerId)
             {
-                Name = player.Name;
+                Name = player.Variety.AsCustomBot().Name;
                 Logger = new Logging(Name, LogLevel.Information);
                 break;
             }
@@ -152,7 +152,7 @@ public abstract class Bot
         Team = (int)controllableTeamInfo.Team;
         var controllable = controllableTeamInfo.Controllables[0];
         Index = (int)controllable.Index;
-        SpawnId = controllable.SpawnId;
+        PlayerId = controllable.Identifier;
         _hasPlayerMapping = true;
 
         TryInitialize();

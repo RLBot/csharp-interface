@@ -21,8 +21,7 @@ public class Match
 
     public Match(
         string? mainExecutablePath = null,
-        string? mainExecutableName = null,
-        bool printVersionInfo = true
+        string? mainExecutableName = null
     )
     {
         _mainExecutablePath = mainExecutablePath;
@@ -31,9 +30,6 @@ public class Match
 
         _gameInterface = new Interface("", logger: _logger);
         _gameInterface.OnGamePacketCallback += PacketReporter;
-
-        if (printVersionInfo)
-            Version.PrintCurrentReleaseNotes();
     }
 
     public void EnsureServerStarted()

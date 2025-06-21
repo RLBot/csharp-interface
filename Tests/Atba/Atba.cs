@@ -2,6 +2,9 @@ using Microsoft.Extensions.Logging;
 using MyBot.Math;
 using RLBot.Flat;
 using RLBot.Manager;
+using RLBot.Util;
+using Vector3 = System.Numerics.Vector3;
+using Color = System.Drawing.Color;
 
 Atba bot = new();
 bot.Run();
@@ -43,6 +46,10 @@ class Atba : Bot
         controller.Throttle = 1;
 
         controller.Jump = packet.MatchInfo.LastSpectated == Index;
+        
+        Renderer.Begin();
+        Renderer.DrawLine3D(myCar.Physics.Location.ToSysVec(), packet.Balls[0].Physics.Location.ToSysVec(), Color.White);
+        Renderer.End();
 
         return controller;
     }

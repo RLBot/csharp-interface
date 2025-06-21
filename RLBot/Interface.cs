@@ -12,13 +12,12 @@ public class Interface
 
     public bool IsConnected { get; private set; } = false;
     private bool _running = false;
-    private FlatBufferBuilder _flatBufferBuilder = new(1024);
 
     private readonly int _connectionTimeout;
     private readonly Logging _logger;
     private readonly TcpClient _client = new();
-    private SocketSpecStreamReader? _socketSpecReader;
-    private SocketSpecStreamWriter? _socketSpecWriter;
+    private SpecStreamReader? _socketSpecReader;
+    private SpecStreamWriter? _socketSpecWriter;
 
     public readonly string AgentId;
     public event Action OnConnectCallback = delegate { };
@@ -28,7 +27,8 @@ public class Interface
     public event Action<MatchCommT> OnMatchCommunicationCallback = delegate { };
     public event Action<BallPredictionT> OnBallPredictionCallback = delegate { };
     public event Action<ControllableTeamInfoT> OnControllableTeamInfoCallback = delegate { };
-    public event Action<TypedPayload> OnRawPayloadCallback = delegate { };
+    public event Action<RenderingStatusT> OnRenderingStatusCallback = delegate { };
+    public event Action<CorePacketT> OnAnyMessageCallback = delegate { };
 
     public Interface(string agentId, int connectionTimeout = 120, Logging? logger = null)
     {
@@ -47,90 +47,60 @@ public class Interface
         _client.NoDelay = true;
     }
 
-    public void SendFlatBuffer<T>(DataType type, Offset<T> offset)
-        where T : struct
+    public void SendFlatBuffer(InterfaceMessageUnion message)
     {
         if (!IsConnected)
         {
             throw new Exception("Connection has not been established");
         }
-        _flatBufferBuilder.Finish(offset.Value);
-        _socketSpecWriter!.Write(TypedPayload.FromFlatBufferBuilder(type, _flatBufferBuilder));
+        _socketSpecWriter!.Write(message);
         _socketSpecWriter.Send();
     }
 
     public void SendInitComplete()
     {
-        if (!IsConnected)
-        {
-            throw new Exception("Connection has not been established");
-        }
-        _socketSpecWriter!.Write(
-            new TypedPayload()
-            {
-                Type = DataType.InitComplete,
-                Payload = new ArraySegment<byte>(Array.Empty<byte>()),
-            }
-        );
-        _socketSpecWriter.Send();
+        SendFlatBuffer(InterfaceMessageUnion.FromInitComplete(new InitCompleteT()));
     }
 
     public void SendSetLoadout(SetLoadoutT setLoadout)
     {
-        _flatBufferBuilder.Clear();
-        var offset = SetLoadout.Pack(_flatBufferBuilder, setLoadout);
-        SendFlatBuffer(DataType.SetLoadout, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromSetLoadout(setLoadout));
     }
 
     public void SendMatchComm(MatchCommT matchComm)
     {
-        _flatBufferBuilder.Clear();
-        var offset = MatchComm.Pack(_flatBufferBuilder, matchComm);
-        SendFlatBuffer(DataType.MatchComms, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromMatchComm(matchComm));
     }
 
     public void SendPlayerInput(PlayerInputT playerInput)
     {
-        _flatBufferBuilder.Clear();
-        var offset = PlayerInput.Pack(_flatBufferBuilder, playerInput);
-        SendFlatBuffer(DataType.PlayerInput, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromPlayerInput(playerInput));
     }
 
     public void SendGameState(DesiredGameStateT gameState)
     {
-        _flatBufferBuilder.Clear();
-        var offset = DesiredGameState.Pack(_flatBufferBuilder, gameState);
-        SendFlatBuffer(DataType.DesiredGameState, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromDesiredGameState(gameState));
     }
 
     public void SendRenderGroup(RenderGroupT renderGroup)
     {
-        _flatBufferBuilder.Clear();
-        var offset = RenderGroup.Pack(_flatBufferBuilder, renderGroup);
-        SendFlatBuffer(DataType.RenderGroup, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromRenderGroup(renderGroup));
     }
 
     public void SendRemoveRenderGroup(RemoveRenderGroupT removeRenderGroup)
     {
-        _flatBufferBuilder.Clear();
-        var offset = RemoveRenderGroup.Pack(_flatBufferBuilder, removeRenderGroup);
-        SendFlatBuffer(DataType.RemoveRenderGroup, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromRemoveRenderGroup(removeRenderGroup));
     }
 
     public void StopMatch(bool shutdownServer = false)
     {
         var stopCommand = new StopCommandT { ShutdownServer = shutdownServer };
-
-        _flatBufferBuilder.Clear();
-        var offset = StopCommand.Pack(_flatBufferBuilder, stopCommand);
-        SendFlatBuffer(DataType.StopCommand, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromStopCommand(stopCommand));
     }
 
     public void StartMatch(MatchConfigurationT matchConfig)
     {
-        _flatBufferBuilder.Clear();
-        var offset = MatchConfiguration.Pack(_flatBufferBuilder, matchConfig);
-        SendFlatBuffer(DataType.MatchSettings, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromMatchConfiguration(matchConfig));
     }
 
     public void StartMatch(string matchConfigPath)
@@ -145,10 +115,7 @@ public class Interface
             );
 
         var startCommand = new StartCommandT { ConfigPath = matchConfigPath };
-
-        _flatBufferBuilder.Clear();
-        var offset = StartCommand.Pack(_flatBufferBuilder, startCommand);
-        SendFlatBuffer(DataType.StartCommand, offset);
+        SendFlatBuffer(InterfaceMessageUnion.FromStartCommand(startCommand));
     }
 
     public void Connect(
@@ -222,8 +189,8 @@ public class Interface
             _client.ReceiveTimeout = 0;
         }
 
-        _socketSpecReader = new SocketSpecStreamReader(_client.GetStream());
-        _socketSpecWriter = new SocketSpecStreamWriter(_client.GetStream());
+        _socketSpecReader = new SpecStreamReader(_client.GetStream());
+        _socketSpecWriter = new SpecStreamWriter(_client.GetStream());
 
         IPEndPoint? localIpEndPoint = _client.Client.LocalEndPoint as IPEndPoint;
         _logger.LogInformation(
@@ -234,21 +201,15 @@ public class Interface
 
         OnConnectCallback();
 
-        var flatbuffer = new ConnectionSettingsT
+        var connectionSettings = new ConnectionSettingsT
         {
             AgentId = AgentId,
             WantsBallPredictions = wantsBallPredictions,
             WantsComms = wantsMatchCommunications,
             CloseBetweenMatches = closeBetweenMatches,
         };
-        _flatBufferBuilder.Clear();
-        int offset = ConnectionSettings.Pack(_flatBufferBuilder, flatbuffer).Value;
-        _flatBufferBuilder.Finish(offset);
-
-        _socketSpecWriter.Write(
-            TypedPayload.FromFlatBufferBuilder(DataType.ConnectionSettings, _flatBufferBuilder)
-        );
-        _socketSpecWriter.Send();
+        
+        SendFlatBuffer(InterfaceMessageUnion.FromConnectionSettings(connectionSettings));
     }
 
     public void Run(bool backgroundThread = false)
@@ -296,11 +257,11 @@ public class Interface
         {
             _client.Client.Blocking = blocking;
 
-            TypedPayload incomingMessage = _socketSpecReader!.ReadOne();
+            CorePacketT packet = _socketSpecReader!.ReadOne().UnPack();
 
             try
             {
-                return HandleIncomingMessage(incomingMessage)
+                return HandleIncomingMessage(packet)
                     ? MsgHandlingResult.MoreMsgsQueued
                     : MsgHandlingResult.Terminated;
             }
@@ -308,65 +269,62 @@ public class Interface
             {
                 _logger.LogError(
                     "Unexpected error while handling message of type {0}: {1}",
-                    incomingMessage.Type,
+                    packet.Message.Type,
                     e
                 );
                 return MsgHandlingResult.Terminated;
             }
         }
-        catch (SocketException)
+        catch (Exception e)
         {
-            return MsgHandlingResult.NoIncomingMsgs;
-        }
-        catch
-        {
-            _logger.LogError("SocketRelay disconnected unexpectedly!");
+            if (e.InnerException is SocketException)
+            {
+                return MsgHandlingResult.NoIncomingMsgs;
+            }
+            _logger.LogError("SocketRelay disconnected unexpectedly! {}", e);
             return MsgHandlingResult.Terminated;
         }
     }
 
-    private bool HandleIncomingMessage(TypedPayload msg)
+    private bool HandleIncomingMessage(CorePacketT packet)
     {
-        OnRawPayloadCallback(msg);
+        OnAnyMessageCallback(packet);
 
-        ByteBuffer byteBuffer = new(msg.Payload.Array, msg.Payload.Offset);
-
-        switch (msg.Type)
+        switch (packet.Message.Type)
         {
-            case DataType.None:
+            case CoreMessage.NONE:
+            case CoreMessage.DisconnectSignal:
                 return false;
-            case DataType.GamePacket:
-                GamePacketT gamePacket = GamePacket.GetRootAsGamePacket(byteBuffer).UnPack();
+            case CoreMessage.GamePacket:
+                GamePacketT gamePacket = packet.Message.AsGamePacket();
                 OnGamePacketCallback(gamePacket);
                 break;
-            case DataType.FieldInfo:
-                FieldInfoT fieldInfo = FieldInfo.GetRootAsFieldInfo(byteBuffer).UnPack();
+            case CoreMessage.FieldInfo:
+                FieldInfoT fieldInfo = packet.Message.AsFieldInfo();
                 OnFieldInfoCallback(fieldInfo);
                 break;
-            case DataType.MatchSettings:
-                MatchConfigurationT matchSettings = MatchConfiguration
-                    .GetRootAsMatchConfiguration(byteBuffer)
-                    .UnPack();
+            case CoreMessage.MatchConfiguration:
+                MatchConfigurationT matchSettings = packet.Message.AsMatchConfiguration();
                 OnMatchConfigCallback(matchSettings);
                 break;
-            case DataType.MatchComms:
-                MatchCommT matchComm = MatchComm.GetRootAsMatchComm(byteBuffer).UnPack();
+            case CoreMessage.MatchComm:
+                MatchCommT matchComm = packet.Message.AsMatchComm();
                 OnMatchCommunicationCallback(matchComm);
                 break;
-            case DataType.BallPrediction:
-                BallPredictionT ballPrediction = BallPrediction
-                    .GetRootAsBallPrediction(byteBuffer)
-                    .UnPack();
+            case CoreMessage.BallPrediction:
+                BallPredictionT ballPrediction = packet.Message.AsBallPrediction();
                 OnBallPredictionCallback(ballPrediction);
                 break;
-            case DataType.ControllableTeamInfo:
-                ControllableTeamInfoT controllableTeamInfo = ControllableTeamInfo
-                    .GetRootAsControllableTeamInfo(byteBuffer)
-                    .UnPack();
+            case CoreMessage.ControllableTeamInfo:
+                ControllableTeamInfoT controllableTeamInfo = packet.Message.AsControllableTeamInfo();
                 OnControllableTeamInfoCallback(controllableTeamInfo);
                 break;
+            case CoreMessage.RenderingStatus:
+                RenderingStatusT renderingStatus = packet.Message.AsRenderingStatus();
+                OnRenderingStatusCallback(renderingStatus);
+                break;
             default:
-                _logger.LogWarning("Received message of unknown type: {0}", msg.Type);
+                _logger.LogWarning("Received message of unknown type: {0}", packet.Message.Type);
                 break;
         }
 
@@ -381,13 +339,7 @@ public class Interface
             return;
         }
 
-        _socketSpecWriter!.Write(
-            new TypedPayload()
-            {
-                Type = DataType.None,
-                Payload = new ArraySegment<byte>(Array.Empty<byte>()),
-            }
-        );
+        _socketSpecWriter!.Write(InterfaceMessageUnion.FromDisconnectSignal(new DisconnectSignalT()));
         _socketSpecWriter.Send();
 
         var timeout = 5.0;
