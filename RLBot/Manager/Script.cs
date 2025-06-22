@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
+using RLBot.GameState;
 using RLBot.Util;
 
 namespace RLBot.Manager;
@@ -218,6 +219,14 @@ public abstract class Script
     public void SetLoadout(SetLoadoutT setLoadout) =>
         _gameInterface.SendSetLoadout(setLoadout);
 
+    /// <summary>
+    /// Modify the current game state using a builder pattern.
+    /// </summary>
+    public DesiredGameStateBuilder GameStateBuilder()
+    {
+        return new DesiredGameStateBuilder(_gameInterface);
+    }
+    
     public void SetGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,

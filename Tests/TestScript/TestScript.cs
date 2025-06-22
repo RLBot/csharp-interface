@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
+using Vector3 = System.Numerics.Vector3;
 using RLBot.Manager;
 
 TestScript script = new TestScript();
@@ -10,7 +11,9 @@ class TestScript : Script
     private float _next = 10f;
 
     public TestScript()
-        : base("test/csharp_script") { }
+        : base("test/csharp_script")
+    {
+    }
 
     public override void Initialize()
     {
@@ -22,14 +25,14 @@ class TestScript : Script
         if (packet.MatchInfo.SecondsElapsed < _next || packet.Balls.Count == 0)
             return;
 
-        Dictionary<int, DesiredBallStateT> balls = new();
-        DesiredBallStateT ball = new DesiredBallStateT();
-        ball.Physics = new DesiredPhysicsT();
-        ball.Physics.Velocity = new Vector3PartialT();
-        ball.Physics.Velocity.Y = new FloatT();
-        ball.Physics.Velocity.Y.Val = packet.Balls[0].Physics.Velocity.Y + 1000f;
-        balls.Add(0, ball);
-        SetGameState(balls: balls);
+        // State setting
+        GameStateBuilder()
+            .Ball(0, c => c
+                .Location(Vector3.UnitZ * 93)
+                .VelocityZ(packet.Balls[0].Physics.Velocity.Z + 1000f)
+            )
+            .Car(1, c => c.Boost(100).RotationYaw(0))
+            .BuildAndSend();
 
         _next = packet.MatchInfo.SecondsElapsed + 10f;
     }
