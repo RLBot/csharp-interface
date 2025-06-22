@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
+using RLBot.GameState;
 using RLBot.Util;
 
 namespace RLBot.Manager;
@@ -251,6 +252,14 @@ public abstract class Bot
     {
         var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
         _gameInterface.SendGameState(gameState);
+    }
+
+    /// <summary>
+    /// Modify the current game state using a builder pattern.
+    /// </summary>
+    public DesiredGameStateBuilder GameStateBuilder()
+    {
+        return new DesiredGameStateBuilder(_gameInterface);
     }
 
     public virtual void Retire() { }
