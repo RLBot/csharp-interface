@@ -2,13 +2,8 @@ using RLBot.Flat;
 
 namespace RLBot.GameState;
 
-public class DesiredMatchInfoBuilder(DesiredMatchInfoT matchInfo)
+public readonly struct DesiredMatchInfoBuilder(DesiredMatchInfoT matchInfo)
 {
-    public DesiredMatchInfoT Build()
-    {
-        return matchInfo;
-    }
-
     /// <summary>
     /// Set the world gravity z.  
     /// </summary>

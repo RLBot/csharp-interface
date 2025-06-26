@@ -3,7 +3,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace RLBot.GameState;
 
-public class DesiredCarStateBuilder
+public readonly struct DesiredCarStateBuilder
 {
     private readonly DesiredCarStateT _carState;
 
@@ -11,11 +11,6 @@ public class DesiredCarStateBuilder
     {
         _carState = carState;
         carState.Physics ??= new DesiredPhysicsT();
-    }
-
-    public DesiredCarStateT Build()
-    {
-        return _carState;
     }
 
     /// <summary>

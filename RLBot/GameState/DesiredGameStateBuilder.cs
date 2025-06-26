@@ -2,7 +2,7 @@ using RLBot.Flat;
 
 namespace RLBot.GameState;
 
-public class DesiredGameStateBuilder(Interface @interface)
+public struct DesiredGameStateBuilder(Interface @interface)
 {
     private readonly DesiredGameStateT _state = new()
     {
@@ -35,6 +35,25 @@ public class DesiredGameStateBuilder(Interface @interface)
         build(builder);
         return this;
     }
+
+    /// <summary>
+    /// Modify the desired cars at the given indices.
+    /// </summary>
+    public DesiredGameStateBuilder Cars(IEnumerable<int> indices,
+        Func<int, DesiredCarStateBuilder, DesiredCarStateBuilder> build)
+    {
+        foreach (var index in indices)
+        {
+            while (_state.CarStates.Count <= index)
+            {
+                _state.CarStates.Add(new());
+            }
+
+            var builder = new DesiredCarStateBuilder(_state.CarStates[index]);
+            build(index, builder);
+        }
+        return this;
+    }
     
     /// <summary>
     /// Modify the desired ball state at the given index.
@@ -48,6 +67,25 @@ public class DesiredGameStateBuilder(Interface @interface)
 
         var builder = new DesiredBallStateBuilder(_state.BallStates[index]);
         build(builder);
+        return this;
+    }
+
+    /// <summary>
+    /// Modify the desired balls at the given indices. 
+    /// </summary>
+    public DesiredGameStateBuilder Balls(IEnumerable<int> indices,
+        Func<int, DesiredBallStateBuilder, DesiredBallStateBuilder> build)
+    {
+        foreach (var index in indices)
+        {
+            while (_state.BallStates.Count <= index)
+            {
+                _state.BallStates.Add(new());
+            }
+
+            var builder = new DesiredBallStateBuilder(_state.BallStates[index]);
+            build(index, builder);
+        }
         return this;
     }
 
