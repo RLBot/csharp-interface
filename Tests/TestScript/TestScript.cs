@@ -27,9 +27,9 @@ class TestScript : Script
 
         // State setting
         GameStateBuilder()
-            .Ball(0, c => c
+            .Balls(Enumerable.Range(0, packet.Balls.Count), (i, c) => c
                 .Location(Vector3.UnitZ * 93)
-                .VelocityZ(packet.Balls[0].Physics.Velocity.Z + 1000f)
+                .VelocityZ(packet.Balls[i].Physics.Velocity.Z + 1000f)
             )
             .Car(1, c => c.Boost(100).RotationYaw(0))
             .BuildAndSend();
