@@ -3,7 +3,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace RLBot.GameState;
 
-public class DesiredBallStateBuilder
+public readonly struct DesiredBallStateBuilder
 {
     private readonly DesiredBallStateT _ballState;
 
