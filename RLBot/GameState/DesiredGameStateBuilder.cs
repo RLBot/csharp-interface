@@ -36,6 +36,9 @@ public struct DesiredGameStateBuilder(Interface @interface)
         return this;
     }
 
+    /// <summary>
+    /// Modify the desired cars at the given indices.
+    /// </summary>
     public DesiredGameStateBuilder Cars(IEnumerable<int> indices,
         Func<int, DesiredCarStateBuilder, DesiredCarStateBuilder> build)
     {
