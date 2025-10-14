@@ -1,13 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>RLBot.Framework</PackageId>
+    <PackageVersion>3.0.0-alpha1</PackageVersion>
+    <Authors>RLBot Community</Authors>
+    <Company>RLBot</Company>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/RLBot/csharp-interface</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/RLBot/csharp-interface/master/RLBot/logo.png</PackageIconUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageDescription>
+      A library to interface with the RLBot v5 framework through .NET languages.
+    </PackageDescription>
+    <Copyright>Copyright 2021</Copyright>
+    <PackageTags>rocket-league;rocketleague;ai;bot</PackageTags>
+
+    <RepositoryUrl>https://github.com/RLBot/csharp-interface.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>master</RepositoryBranch>
+
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
     <OutputType>Library</OutputType>
     <RootNamespace>RLBot</RootNamespace>
-    <PackageVersion>3.0.0-alpha1</PackageVersion>
   </PropertyGroup>
 
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile">
@@ -17,6 +39,13 @@
       Overwrite="true"/>
   </Target>
 
+  <ItemGroup>
+    <None Include="logo.png">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Tomlyn" Version="0.17.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
