@@ -7,7 +7,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <OutputType>Library</OutputType>
     <RootNamespace>RLBot</RootNamespace>
-    <PackageVersion>5.0.0-alpha1</PackageVersion>
+    <PackageVersion>3.0.0-alpha1</PackageVersion>
   </PropertyGroup>
 
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeCompile">

@@ -2,7 +2,7 @@ using RLBot.Flat;
 
 namespace RLBot.GameState;
 
-public struct DesiredGameStateBuilder(Interface @interface)
+public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
 {
     private readonly DesiredGameStateT _state = new()
     {
@@ -100,6 +100,6 @@ public struct DesiredGameStateBuilder(Interface @interface)
 
     public void BuildAndSend()
     {
-        @interface.SendGameState(_state);
+        rlbotInterface.SendGameState(_state);
     }
 }

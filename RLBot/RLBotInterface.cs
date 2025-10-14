@@ -1,14 +1,15 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using Google.FlatBuffers;
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
 using RLBot.Util;
 
-public class Interface
+namespace RLBot;
+
+public class RLBotInterface
 {
-    public const int RLBOT_SERVER_PORT = 23234;
+    public const int DEFAULT_RLBOT_SERVER_PORT = 23234;
 
     public bool IsConnected { get; private set; } = false;
     private bool _running = false;
@@ -30,7 +31,7 @@ public class Interface
     public event Action<RenderingStatusT> OnRenderingStatusCallback = delegate { };
     public event Action<CorePacketT> OnAnyMessageCallback = delegate { };
 
-    public Interface(string agentId, int connectionTimeout = 120, Logging? logger = null)
+    public RLBotInterface(string agentId, int connectionTimeout = 120, Logging? logger = null)
     {
         AgentId = agentId;
         _connectionTimeout = connectionTimeout;
@@ -122,7 +123,7 @@ public class Interface
         bool wantsMatchCommunications,
         bool wantsBallPredictions,
         bool closeBetweenMatches = true,
-        int rlbotServerPort = RLBOT_SERVER_PORT
+        int rlbotServerPort = DEFAULT_RLBOT_SERVER_PORT
     )
     {
         if (IsConnected)
@@ -170,8 +171,8 @@ public class Interface
                 throw new SocketException(
                     (int)SocketError.ConnectionRefused,
                     "Connection was refused/aborted repeatedly! "
-                        + "Ensure that Rocket League and the RLBotServer is running. "
-                        + "Try calling `ensure_server_started()` before connecting."
+                    + "Ensure that Rocket League and the RLBotServer is running. "
+                    + "Try calling `ensure_server_started()` before connecting."
                 );
             }
         }
@@ -179,8 +180,8 @@ public class Interface
         {
             throw new TimeoutException(
                 "Took too long to connect to the RLBot! "
-                    + "Ensure that Rocket League and the RLBotServer is running."
-                    + "Try calling `ensure_server_started()` before connecting.",
+                + "Ensure that Rocket League and the RLBotServer is running."
+                + "Try calling `ensure_server_started()` before connecting.",
                 e
             );
         }

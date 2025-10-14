@@ -7,10 +7,10 @@ namespace RLBot.Manager;
 
 public abstract class Script
 {
-    public Logging Logger = new("rlbot", LogLevel.Information);
+    public Logging Logger = new("Script", LogLevel.Information);
 
     public int Index { get; private set; }
-    public string Name { get; private set; }
+    public string Name { get; private set; } = "UnknownScript";
 
     public MatchConfigurationT MatchConfig { get; private set; } = new();
     public FieldInfoT FieldInfo { get; private set; } = new();
@@ -22,7 +22,7 @@ public abstract class Script
     private bool _hasMatchSettings = false;
     private bool _hasFieldInfo = false;
 
-    private readonly Interface _gameInterface;
+    private readonly RLBotInterface _rlbotInterface;
     private GamePacketT? _latestPacket;
     private BallPredictionT _latestPrediction = new();
 
@@ -44,15 +44,14 @@ public abstract class Script
             );
         }
 
-        Logger = new Logging("Script", LogLevel.Information);
-        _gameInterface = new Interface(agentId, logger: Logger);
-        _gameInterface.OnMatchConfigCallback += HandleMatchConfig;
-        _gameInterface.OnFieldInfoCallback += HandleFieldInfo;
-        _gameInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
-        _gameInterface.OnBallPredictionCallback += HandleBallPrediction;
-        _gameInterface.OnGamePacketCallback += HandleGamePacket;
+        _rlbotInterface = new RLBotInterface(agentId, logger: Logger);
+        _rlbotInterface.OnMatchConfigCallback += HandleMatchConfig;
+        _rlbotInterface.OnFieldInfoCallback += HandleFieldInfo;
+        _rlbotInterface.OnMatchCommunicationCallback += HandleMatchCommunication;
+        _rlbotInterface.OnBallPredictionCallback += HandleBallPrediction;
+        _rlbotInterface.OnGamePacketCallback += HandleGamePacket;
 
-        Renderer = new Renderer(_gameInterface);
+        Renderer = new Renderer(_rlbotInterface);
     }
 
     private void TryInitialize()
@@ -75,7 +74,7 @@ public abstract class Script
         }
 
         _initialized = true;
-        _gameInterface.SendInitComplete();
+        _rlbotInterface.SendInitComplete();
     }
 
     public virtual void Initialize() { }
@@ -87,7 +86,7 @@ public abstract class Script
         for (int i = 0; i < matchConfig.ScriptConfigurations.Count; i++)
         {
             var script = matchConfig.ScriptConfigurations[i];
-            if (script.AgentId == _gameInterface.AgentId)
+            if (script.AgentId == _rlbotInterface.AgentId)
             {
                 Index = i;
                 Name = script.Name;
@@ -97,7 +96,7 @@ public abstract class Script
 
         if (!_hasMatchSettings)
         {
-            Logger.LogWarning("Script with agent id '{}' did not find itself in the match settings", _gameInterface.AgentId);
+            Logger.LogWarning("Script with agent id '{}' did not find itself in the match settings", _rlbotInterface.AgentId);
         }
         
         TryInitialize();
@@ -135,7 +134,7 @@ public abstract class Script
         bool teamOnly = false
     )
     {
-        _gameInterface.SendMatchComm(
+        _rlbotInterface.SendMatchComm(
             new MatchCommT
             {
                 Index = (uint)Index,
@@ -173,12 +172,12 @@ public abstract class Script
     public void Run(bool wantsMatchCommunications = true, bool wantsBallPredictions = true)
     {
         int rlbotServerPort = int.Parse(
-            Environment.GetEnvironmentVariable("RLBOT_SERVER_PORT") ?? "23234"
+            Environment.GetEnvironmentVariable("RLBOT_SERVER_PORT") ?? RLBotInterface.DEFAULT_RLBOT_SERVER_PORT.ToString()
         );
 
         try
         {
-            _gameInterface.Connect(
+            _rlbotInterface.Connect(
                 wantsMatchCommunications,
                 wantsBallPredictions,
                 rlbotServerPort: rlbotServerPort
@@ -186,17 +185,17 @@ public abstract class Script
 
             while (true)
             {
-                var res = _gameInterface.HandleIncomingMessages(
+                var res = _rlbotInterface.HandleIncomingMessages(
                     blocking: _latestPacket is null
                 );
 
                 switch (res)
                 {
-                    case Interface.MsgHandlingResult.Terminated:
+                    case RLBotInterface.MsgHandlingResult.Terminated:
                         return;
-                    case Interface.MsgHandlingResult.MoreMsgsQueued:
+                    case RLBotInterface.MsgHandlingResult.MoreMsgsQueued:
                         continue;
-                    case Interface.MsgHandlingResult.NoIncomingMsgs:
+                    case RLBotInterface.MsgHandlingResult.NoIncomingMsgs:
                         if (_latestPacket is not null)
                         {
                             ProcessPacket(_latestPacket);
@@ -217,14 +216,14 @@ public abstract class Script
     }
 
     public void SetLoadout(SetLoadoutT setLoadout) =>
-        _gameInterface.SendSetLoadout(setLoadout);
+        _rlbotInterface.SendSetLoadout(setLoadout);
 
     /// <summary>
     /// Modify the current game state using a builder pattern.
     /// </summary>
     public DesiredGameStateBuilder GameStateBuilder()
     {
-        return new DesiredGameStateBuilder(_gameInterface);
+        return new DesiredGameStateBuilder(_rlbotInterface);
     }
     
     public void SetGameState(
@@ -235,7 +234,7 @@ public abstract class Script
     )
     {
         var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
-        _gameInterface.SendGameState(gameState);
+        _rlbotInterface.SendGameState(gameState);
     }
 
     public virtual void Retire() { }

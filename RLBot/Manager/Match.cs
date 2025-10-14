@@ -12,13 +12,13 @@ public class Match
 
     public GamePacketT? Packet { get; private set; }
     private Process? _rlbotServerProcess;
-    private int _rlbotServerPort = Interface.RLBOT_SERVER_PORT;
+    private int _rlbotServerPort = RLBotInterface.DEFAULT_RLBOT_SERVER_PORT;
     private bool _initialized = false;
 
     private string? _mainExecutablePath;
     private string _mainExecutableName = OsConstants.MainExecutableName;
 
-    private Interface _gameInterface;
+    private RLBotInterface _rlbotInterface;
 
     public Match(
         string? mainExecutablePath = null,
@@ -29,12 +29,14 @@ public class Match
         if (mainExecutableName != null)
             _mainExecutableName = mainExecutableName;
 
-        _gameInterface = new Interface("", logger: _logger);
-        _gameInterface.OnGamePacketCallback += PacketReporter;
+        _rlbotInterface = new RLBotInterface("", logger: _logger);
+        _rlbotInterface.OnGamePacketCallback += PacketReporter;
     }
 
     public void EnsureServerStarted()
     {
+        _logger.LogWarning("The C# RLBot Interface cannot ensure the RLBot Server is running. The feature has yet to be implemented.");
+        
         // self.rlbot_server_process, self.rlbot_server_port = gateway.find_server_process(
         //     self.main_executable_name
         // )
@@ -67,9 +69,9 @@ public class Match
         bool wantsMatchCommunications,
         bool wantsBallPredictions,
         bool closeAfterMatch = true,
-        int rlbotServerPort = Interface.RLBOT_SERVER_PORT
+        int rlbotServerPort = RLBotInterface.DEFAULT_RLBOT_SERVER_PORT
     ) =>
-        _gameInterface.Connect(
+        _rlbotInterface.Connect(
             wantsMatchCommunications,
             wantsBallPredictions,
             closeAfterMatch,
@@ -90,11 +92,11 @@ public class Match
     {
         EnsureGameConnection();
 
-        _gameInterface.StartMatch(config);
+        _rlbotInterface.StartMatch(config);
 
         if (!_initialized)
         {
-            _gameInterface.SendInitComplete();
+            _rlbotInterface.SendInitComplete();
             _initialized = true;
         }
 
@@ -109,11 +111,11 @@ public class Match
     {
         EnsureGameConnection();
 
-        _gameInterface.StartMatch(configPath);
+        _rlbotInterface.StartMatch(configPath);
 
         if (!_initialized)
         {
-            _gameInterface.SendInitComplete();
+            _rlbotInterface.SendInitComplete();
             _initialized = true;
         }
 
@@ -126,14 +128,14 @@ public class Match
 
     private void EnsureGameConnection()
     {
-        if (!_gameInterface.IsConnected)
+        if (!_rlbotInterface.IsConnected)
         {
-            _gameInterface.Connect(
+            _rlbotInterface.Connect(
                 wantsMatchCommunications: false,
                 wantsBallPredictions: false,
                 closeBetweenMatches: false
             );
-            _gameInterface.Run(backgroundThread: true);
+            _rlbotInterface.Run(backgroundThread: true);
         }
     }
 
@@ -142,7 +144,7 @@ public class Match
     /// </summary>
     public DesiredGameStateBuilder GameStateBuilder()
     {
-        return new DesiredGameStateBuilder(_gameInterface);
+        return new DesiredGameStateBuilder(_rlbotInterface);
     }
     
     public void SetGameState(
@@ -153,10 +155,10 @@ public class Match
     )
     {
         var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
-        _gameInterface.SendGameState(gameState);
+        _rlbotInterface.SendGameState(gameState);
     }
 
-    public void Disconnect() => _gameInterface.Disconnect();
+    public void Disconnect() => _rlbotInterface.Disconnect();
 
-    public void StopMatch() => _gameInterface.StopMatch();
+    public void StopMatch() => _rlbotInterface.StopMatch();
 }
