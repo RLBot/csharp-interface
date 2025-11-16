@@ -18,6 +18,9 @@ public class Renderer
 
     private readonly RLBotInterface _rlbotInterface;
 
+    private float _screenWidthScale = 1f;
+    private float _screenHeightScale = 1f;
+
     /// <summary>True if rendering is enabled. Note the Renderer will still send render messages if
     /// draw methods are called, but RLBot will likely ignore the messages.</summary>
     public bool CanRender { get; private set; } = true;
@@ -40,11 +43,28 @@ public class Renderer
     /// <summary>All active render groups. Render groups persist until overriden or cleared.</summary>
     public HashSet<string>.Enumerator ActiveGroupIds => _activeGroupIds.GetEnumerator();
 
-    public Renderer(RLBotInterface rlbotInterface)
+    public Renderer(
+        RLBotInterface rlbotInterface,
+        int screenWidth = 1920,
+        int screenHeight = 1080
+    )
     {
         _rlbotInterface = rlbotInterface;
-        _rlbotInterface.OnMatchConfigCallback += m => CanRender = m.EnableRendering == DebugRendering.OnByDefault;
+        _rlbotInterface.OnMatchConfigCallback += m =>
+            CanRender = m.EnableRendering == DebugRendering.OnByDefault;
         _rlbotInterface.OnRenderingStatusCallback += s => CanRender = s.Status;
+        AssumeScreenSize(screenWidth, screenHeight);
+    }
+
+    /// <summary>
+    /// Set the presumed screen size when scaling 2D rendering to screens-space coordinates.
+    /// </summary>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    public void AssumeScreenSize(int width, int height)
+    {
+        _screenWidthScale = 1f / width;
+        _screenHeightScale = 1f / height;
     }
 
     /// <summary>
@@ -114,6 +134,7 @@ public class Renderer
     /// <summary>
     /// Add a render message to the current render group.
     /// It is typically more convenient to use the other draw methods.
+    /// 2D positions and sizes must be in screen-space, e.g. x=0.1 is 10% of screen width.
     /// </summary>
     /// <param name="msg">The render message to add</param>
     public void Draw(RenderMessageT msg)
@@ -200,12 +221,12 @@ public class Renderer
         DrawPolyLine3D(points.Select(v => v.ToFlatBuf()), color);
 
     /// <summary>
-    /// Draw text in 2D space. x and y uses screen-space coordinates, i.e. 0.1 is 10% of the screen width/height.
+    /// Draw text in 2D space. x and y uses pixel coordinates based on the declared screen size.
     /// The characters of the font are 20 pixels wide and 10 pixels tall when scale is 1.
     /// </summary>
     /// <param name="text">The text to draw.</param>
-    /// <param name="x">x position of text in screen-space coordinates.</param>
-    /// <param name="y">y position of text in screen-space coordinates.</param>
+    /// <param name="x">x position of text in pixel coordinates.</param>
+    /// <param name="y">y position of text in pixel coordinates.</param>
     /// <param name="scale">Scale of text.</param>
     /// <param name="foreground">Color of text. Uses <see cref="Color"/> if null.</param>
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
@@ -229,8 +250,8 @@ public class Renderer
                     new String2DT
                     {
                         Text = text,
-                        X = x,
-                        Y = y,
+                        X = x * _screenWidthScale,
+                        Y = y * _screenHeightScale,
                         Scale = scale,
                         Foreground = (foreground ?? Color).ToFlatBuf(),
                         Background = (background ?? Color.Transparent).ToFlatBuf(),
@@ -243,11 +264,11 @@ public class Renderer
     }
 
     /// <summary>
-    /// Draw text in 2D space. Position uses screen-space coordinates, i.e. 0.1 is 10% of the screen width/height.
+    /// Draw text in 2D space. Position uses pixel coordinates based on the declared screen size.
     /// The characters of the font are 20 pixels wide and 10 pixels tall when scale is 1.
     /// </summary>
     /// <param name="text">The text to draw.</param>
-    /// <param name="position">Position of text in screen-space coordinates.</param>
+    /// <param name="position">Position of text in pixel coordinates.</param>
     /// <param name="scale">Scale of text.</param>
     /// <param name="foreground">Color of text. Uses <see cref="Color"/> if null.</param>
     /// <param name="background">Color of background for the text. Uses transparent if null.</param>
@@ -345,12 +366,12 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 2D space.
-    /// X, y, width, and height uses screen-space coordinates, i.e. 0.1 is 10% of the screen width/height.
+    /// X, y, width, and height uses pixel coordinates based on the declared screen size.
     /// </summary>
-    /// <param name="x">x position of the rectangle in screen-space coordinates.</param>
-    /// <param name="y">y position of the rectangle in screen-space coordinates.</param>
-    /// <param name="width">Width of the rectangle as a fraction of screen-space width.</param>
-    /// <param name="height">Height of the rectangle as a fraction of screen-space height.</param>
+    /// <param name="x">x position of the rectangle in pixel coordinates.</param>
+    /// <param name="y">y position of the rectangle in pixel coordinates.</param>
+    /// <param name="width">Width of the rectangle in pixels.</param>
+    /// <param name="height">Height of the rectangle in pixels.</param>
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
     /// <param name="centered">Whether the rectangle should be centered at (x,y), or if (x,y) is the top left corner.</param>
     public void DrawRect2D(
@@ -368,10 +389,10 @@ public class Renderer
                 Variety = RenderTypeUnion.FromRect2D(
                     new Rect2DT
                     {
-                        X = x,
-                        Y = y,
-                        Width = width,
-                        Height = height,
+                        X = x * _screenWidthScale,
+                        Y = y * _screenHeightScale,
+                        Width = width * _screenWidthScale,
+                        Height = height * _screenHeightScale,
                         Color = (color ?? Color).ToFlatBuf(),
                     }
                 ),
@@ -381,10 +402,10 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 2D space.
-    /// X, y, width, and height uses screen-space coordinates, i.e. 0.1 is 10% of the screen width/height.
+    /// X, y, width, and height uses pixel coordinates based on the declared screen size.
     /// </summary>
-    /// <param name="position">Position of the rectangle in screen-space coordinates.</param>
-    /// <param name="size">Size of the rectangle using fractions of screen-space size.</param>
+    /// <param name="position">Position of the rectangle in pixel coordinates.</param>
+    /// <param name="size">Size of the rectangle in pixels.</param>
     /// <param name="color">Color of the rectangle. Uses <see cref="Color"/> if null.</param>
     /// <param name="centered">Whether the rectangle should be centered at (x,y), or if (x,y) is the top left corner.</param>
     public void DrawRect2D(
@@ -396,7 +417,7 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 3D space.
-    /// Width and height are screen-space sizes, i.e. 0.1 is 10% of the screen width/height.
+    /// Width and height uses pixel coordinates based on the declared screen size.
     /// The size does not change based on distance to the camera.
     /// </summary>
     /// <param name="anchor">The anchor to draw the rectangle at.</param>
@@ -417,8 +438,8 @@ public class Renderer
                     new Rect3DT
                     {
                         Anchor = anchor,
-                        Width = width,
-                        Height = height,
+                        Width = width * _screenWidthScale,
+                        Height = height * _screenHeightScale,
                         Color = (color ?? Color).ToFlatBuf(),
                     }
                 ),
@@ -428,7 +449,7 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 3D space.
-    /// Width and height are screen-space sizes, i.e. 0.1 is 10% of the screen width/height.
+    /// Width and height uses pixel coordinates based on the declared screen size.
     /// The size does not change based on distance to the camera.
     /// </summary>
     /// <param name="anchor">The anchor to draw the rectangle at.</param>
@@ -439,7 +460,7 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 3D space.
-    /// Width and height are screen-space sizes, i.e. 0.1 is 10% of the screen width/height.
+    /// Width and height uses pixel coordinates based on the declared screen size.
     /// The size does not change based on distance to the camera.
     /// </summary>
     /// <param name="position">The position of the rectangle.</param>
@@ -451,7 +472,7 @@ public class Renderer
 
     /// <summary>
     /// Draw a rectangle in 3D space.
-    /// Width and height are screen-space sizes, i.e. 0.1 is 10% of the screen width/height.
+    /// Width and height uses pixel coordinates based on the declared screen size.
     /// The size does not change based on distance to the camera.
     /// </summary>
     /// <param name="position">The position of the rectangle.</param>

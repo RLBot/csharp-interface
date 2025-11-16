@@ -5,7 +5,7 @@ namespace RLBot.GameState;
 public readonly struct DesiredMatchInfoBuilder(DesiredMatchInfoT matchInfo)
 {
     /// <summary>
-    /// Set the world gravity z.  
+    /// Set the world gravity z.
     /// </summary>
     public DesiredMatchInfoBuilder GravityZ(float value)
     {
