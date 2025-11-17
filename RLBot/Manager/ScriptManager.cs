@@ -3,10 +3,20 @@ using RLBot.Flat;
 
 namespace RLBot.Manager;
 
+/// <summary>A delegate for methods that can create <see cref="IScript"/> instances.</summary>
+public delegate IScript ScriptFactory(RLBotInterface rlbot, int index, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
+
+/// <summary>
+/// A simple manager for scripts. Scripts observe the match and potentially uses debug rendering, state-setting, or match comms.
+/// The manager handles the script's life-cycle including initialization, packet reading loop, and retirement on disconnect.
+/// </summary>
+/// <param name="rlbot">An rlbot connection interface</param>
+/// <param name="defaultAgentId">A unique id for this type of script. Should match the agent id in your script.toml file and typically has the form "devname/scriptname/version".</param>
+/// <param name="scriptFactory">A script factory for creating instances of the script once all required information has arrived.</param>
 public class ScriptManager(
     RLBotInterface rlbot,
     string defaultAgentId,
-    Func<RLBotInterface, int, string, MatchConfigurationT, FieldInfoT, IScript> scriptFactory
+    ScriptFactory scriptFactory
 ) : AgentBaseManager(rlbot, defaultAgentId)
 {
     private IScript? _script;
@@ -39,13 +49,13 @@ public class ScriptManager(
         }
     }
 
-    protected override void HandleMatchComm(MatchCommT matchComm)
+    protected override void HandleMatchComm(MatchCommT msg)
     {
         if (_script == null)
             return;
         try
         {
-            _script.OnMatchCommReceived(matchComm);
+            _script.OnMatchCommReceived(msg);
         }
         catch (Exception e)
         {

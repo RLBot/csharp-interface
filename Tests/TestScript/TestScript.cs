@@ -54,7 +54,7 @@ class TestScript : IScript
         )
             return;
 
-        // State setting
+        // Test state setting
         Rlbot
             .GameStateBuilder()
             .Balls(
@@ -69,7 +69,7 @@ class TestScript : IScript
         _next = packet.MatchInfo.SecondsElapsed + 10f;
     }
 
-    public void OnMatchCommReceived(MatchCommT comm) { }
+    public void OnMatchCommReceived(MatchCommT msg) { }
 
     public void OnRetire() { }
 }

@@ -6,7 +6,7 @@ public interface IScript
 {
     void ProcessPacket(GamePacketT gamePacket, BallPredictionT? ballPrediction);
 
-    void OnMatchCommReceived(MatchCommT comm);
+    void OnMatchCommReceived(MatchCommT msg);
 
     void OnRetire();
 }

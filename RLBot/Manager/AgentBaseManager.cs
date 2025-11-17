@@ -4,6 +4,16 @@ using RLBot.Util;
 
 namespace RLBot.Manager;
 
+/// <summary>
+/// The AgentBaseManager class is an abstract base class for managing agents in RLBot and
+/// implements the common initialization and packet reading behavior. That is, the
+/// AgentBaseManager will wait for the match configuration, field information, and team information
+/// before initializing the agent(s) of this process. Once initialization is complete,
+/// the AgentBaseManager handles messages from RLBot discarding any outdated game packets,
+/// finally passing the latest packet and ball prediction to the implementer.
+/// </summary>
+/// <seealso cref="SingleThreadBotManager"/>
+/// <seealso cref="ScriptManager"/>
 public abstract class AgentBaseManager
 {
     protected Logging Logger = new(nameof(AgentBaseManager), LogLevel.Information);
@@ -51,6 +61,7 @@ public abstract class AgentBaseManager
         Rlbot.OnGamePacketCallback += HandleGamePacket;
     }
 
+    /// <summary>Initialize the agents of this process if the all required information has been received.</summary>
     private void TryInitialize()
     {
         if (IsInitialized || !HasMatchConfig || !HasFieldInfo || !HasTeamInfo)
@@ -71,6 +82,10 @@ public abstract class AgentBaseManager
         IsInitialized = true;
     }
 
+    /// <summary>
+    /// Called when all required information is ready.
+    /// Bot managers should send initial loadouts before returning.
+    /// </summary>
     protected abstract void Initialize();
 
     private void HandleMatchConfig(MatchConfigurationT matchConfig)
@@ -87,27 +102,7 @@ public abstract class AgentBaseManager
         TryInitialize();
     }
 
-    protected abstract void HandleMatchComm(MatchCommT matchComm);
-
-    public void SendMatchComm(
-        int index,
-        int team,
-        List<byte> content,
-        string? display = null,
-        bool teamOnly = false
-    )
-    {
-        Rlbot.SendMatchComm(
-            new MatchCommT
-            {
-                Index = (uint)index,
-                Team = (uint)team,
-                Content = content,
-                Display = display,
-                TeamOnly = teamOnly,
-            }
-        );
-    }
+    protected abstract void HandleMatchComm(MatchCommT msg);
 
     private void HandleBallPrediction(BallPredictionT ballPrediction) =>
         _latestPrediction = ballPrediction;
@@ -121,6 +116,11 @@ public abstract class AgentBaseManager
 
     private void HandleGamePacket(GamePacketT gamePacket) => _latestPacket = gamePacket;
 
+    /// <summary>
+    /// Run the agent manager. This will connect to RLBot and start reading packages. Blocking.
+    /// </summary>
+    /// <param name="wantsMatchCommunications">Whether this process wants to receive match comms.</param>
+    /// <param name="wantsBallPredictions">Whether this process wants to receive ball prediction.</param>
     public void Run(bool wantsMatchCommunications = true, bool wantsBallPredictions = true)
     {
         try
@@ -158,7 +158,15 @@ public abstract class AgentBaseManager
         }
     }
 
+    /// <summary>
+    /// Process the latest game packet and ball prediction.
+    /// See <see cref="_latestPacket"/> and <see cref="_latestPrediction"/>.
+    /// Ball prediction may be null, if ball prediction was not requested.
+    /// </summary>
     protected abstract void ProcessPacket();
 
+    /// <summary>
+    /// Invoked when the agent shuts down.
+    /// </summary>
     protected abstract void Retire();
 }

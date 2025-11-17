@@ -4,8 +4,6 @@ using RLBot;
 using RLBot.Flat;
 using RLBot.Manager;
 using RLBot.Util;
-using Color = System.Drawing.Color;
-using Vector3 = System.Numerics.Vector3;
 
 RLBotInterface rlbot = new();
 SingleThreadBotManager manager = new(
@@ -91,7 +89,7 @@ internal class Atba : IBot
         return controller;
     }
 
-    public void OnMatchCommReceived(MatchCommT comm) { }
+    public void OnMatchCommReceived(MatchCommT msg) { }
 
     public void OnRetire() { }
 }
