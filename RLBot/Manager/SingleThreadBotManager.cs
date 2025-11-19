@@ -4,6 +4,7 @@ using RLBot.Flat;
 namespace RLBot.Manager;
 
 /// <summary>A delegate for methods that can create <see cref="IBot"/> instances.</summary>
+/// <seealso cref="SingleThreadBotManager"/>
 public delegate IBot BotFactory(RLBotInterface rlbot, int index, uint team, string name, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
 
 /// <summary>
@@ -18,7 +19,8 @@ public class SingleThreadBotManager(
     RLBotInterface rlbot,
     string defaultAgentId,
     BotFactory botFactory
-) : AgentBaseManager(rlbot, defaultAgentId)
+)
+    : AgentBaseManager(rlbot, defaultAgentId)
 {
     private record BotInfo(IBot Bot, string Name, int Index);
 

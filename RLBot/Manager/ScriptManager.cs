@@ -4,6 +4,7 @@ using RLBot.Flat;
 namespace RLBot.Manager;
 
 /// <summary>A delegate for methods that can create <see cref="IScript"/> instances.</summary>
+/// <seealso cref="ScriptManager"/>
 public delegate IScript ScriptFactory(RLBotInterface rlbot, int index, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
 
 /// <summary>
@@ -12,7 +13,7 @@ public delegate IScript ScriptFactory(RLBotInterface rlbot, int index, string ag
 /// </summary>
 /// <param name="rlbot">An rlbot connection interface</param>
 /// <param name="defaultAgentId">A unique id for this type of script. Should match the agent id in your script.toml file and typically has the form "devname/scriptname/version".</param>
-/// <param name="scriptFactory">A script factory for creating instances of the script once all required information has arrived.</param>
+/// <param name="scriptFactory">A factory for creating the script instance once all required information has arrived.</param>
 public class ScriptManager(
     RLBotInterface rlbot,
     string defaultAgentId,

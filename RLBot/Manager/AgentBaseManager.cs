@@ -16,7 +16,7 @@ namespace RLBot.Manager;
 /// <seealso cref="ScriptManager"/>
 public abstract class AgentBaseManager
 {
-    protected Logging Logger = new(nameof(AgentBaseManager), LogLevel.Information);
+    protected readonly Logging Logger = new(nameof(AgentBaseManager), LogLevel.Information);
 
     public RLBotInterface Rlbot { get; }
     public string AgentId { get; }
