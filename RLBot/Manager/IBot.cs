@@ -3,6 +3,8 @@ using RLBot.Flat;
 namespace RLBot.Manager;
 
 /// <summary>An interface for simple bots.</summary>
+/// <seealso cref="SingleThreadBotManager"/>
+/// <seealso cref="MultiThreadBotManager"/>
 public interface IBot
 {
     /// <summary>
@@ -31,3 +33,8 @@ public interface IBot
     /// </summary>
     void OnRetire();
 }
+
+/// <summary>A delegate for methods that can create <see cref="IBot"/> instances.</summary>
+/// <seealso cref="SingleThreadBotManager"/>
+/// <seealso cref="MultiThreadBotManager"/>
+public delegate IBot BotFactory(RLBotInterface rlbot, int index, uint team, string name, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);

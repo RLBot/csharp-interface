@@ -13,6 +13,8 @@ namespace RLBot.Manager;
 /// finally passing the latest packet and ball prediction to the implementer.
 /// </summary>
 /// <seealso cref="SingleThreadBotManager"/>
+/// <seealso cref="MultiThreadBotManager"/>
+/// <seealso cref="HivemindManager"/>
 /// <seealso cref="ScriptManager"/>
 public abstract class AgentBaseManager
 {

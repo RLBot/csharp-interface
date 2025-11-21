@@ -3,18 +3,16 @@ using RLBot.Flat;
 
 namespace RLBot.Manager;
 
-/// <summary>A delegate for methods that can create <see cref="IBot"/> instances.</summary>
-/// <seealso cref="SingleThreadBotManager"/>
-public delegate IBot BotFactory(RLBotInterface rlbot, int index, uint team, string name, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
-
 /// <summary>
 /// A simple bot manager than runs everything on a single thread.
-/// Ideal for standard, non-hivemind bots. Hiveminds are support too, but consider other managers.
+/// Ideal for standard, non-hivemind bots. Hiveminds are supported too, but consider other managers.
 /// The manager handles the bot(s)'s life-cycle including initialization, packet reading loop, and retirement on disconnect.
 /// </summary>
 /// <param name="rlbot">An rlbot connection interface</param>
 /// <param name="defaultAgentId">A unique id for this type of bot. Should match the agent id in your bot.toml file and typically has the form "devname/botname/version".</param>
 /// <param name="botFactory">A bot factory for creating instances of the bot once all required information has arrived.</param>
+/// <seealso cref="MultiThreadBotManager"/>
+/// <seealso cref="HivemindManager"/>
 public class SingleThreadBotManager(
     RLBotInterface rlbot,
     string defaultAgentId,
@@ -79,6 +77,7 @@ public class SingleThreadBotManager(
                     botInfo.Name,
                     e
                 );
+                return;
             }
         }
     }
@@ -98,6 +97,7 @@ public class SingleThreadBotManager(
                     botInfo.Name,
                     e
                 );
+                return;
             }
         }
     }
@@ -113,6 +113,7 @@ public class SingleThreadBotManager(
             catch (Exception e)
             {
                 Logger.LogError("{} encountered an error while retiring: {}", botInfo.Name, e);
+                return;
             }
         }
     }

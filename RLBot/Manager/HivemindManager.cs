@@ -1,11 +1,8 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
 
 namespace RLBot.Manager;
-
-/// <summary>A delegate for methods that can create <see cref="IHivemind"/> instances.</summary>
-/// <seealso cref="HivemindManager"/>
-public delegate IHivemind HivemindFactory(RLBotInterface rlbot, List<int> indices, uint team, Dictionary<int, string> names, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
 
 /// <summary>
 /// A manager for hivemind bots.
@@ -16,6 +13,8 @@ public delegate IHivemind HivemindFactory(RLBotInterface rlbot, List<int> indice
 /// <param name="rlbot">An rlbot connection interface</param>
 /// <param name="defaultAgentId">A unique id for this type of bot. Should match the agent id in your bot.toml file and typically has the form "devname/botname/version".</param>
 /// <param name="hivemindFactory">A factory for creating the hivemind instance once all required information has arrived.</param>
+/// <seealso cref="SingleThreadBotManager"/>
+/// <seealso cref="MultiThreadBotManager"/>
 public class HivemindManager(
     RLBotInterface rlbot,
     string? defaultAgentId,
@@ -24,11 +23,13 @@ public class HivemindManager(
     : AgentBaseManager(rlbot, defaultAgentId)
 {
     private IHivemind? _hivemind;
-    private List<int> _indices;
+    private List<int> _indices = new();
     private uint _team;
     
     protected override void Initialize()
     {
+        Debug.Assert(_hivemind == null && _indices.Count == 0);
+        
         var playerConfs = MatchConfig.PlayerConfigurations;
         _team = TeamInfo.Team;
         _indices = TeamInfo.Controllables.Select(a => (int)a.Index).ToList();
@@ -57,7 +58,7 @@ public class HivemindManager(
         IDictionary<int, ControllerStateT>? controllers = null;
         try
         {
-            controllers = _hivemind.GetOutputs(_latestPacket, _latestPrediction);
+            controllers = _hivemind.GetOutputs(_latestPacket!, _latestPrediction);
         }
         catch (Exception e)
         {

@@ -22,7 +22,7 @@ public class ScriptManager(
 {
     private IScript? _script;
     private int _index;
-    private string _name;
+    private string _name = "Unknown Script";
 
     protected override void Initialize()
     {
