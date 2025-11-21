@@ -37,4 +37,12 @@ public interface IBot
 /// <summary>A delegate for methods that can create <see cref="IBot"/> instances.</summary>
 /// <seealso cref="SingleThreadBotManager"/>
 /// <seealso cref="MultiThreadBotManager"/>
-public delegate IBot BotFactory(RLBotInterface rlbot, int index, uint team, string name, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
+public delegate IBot BotFactory(
+    RLBotInterface rlbot,
+    int index,
+    uint team,
+    string name,
+    string agentId,
+    MatchConfigurationT matchConfig,
+    FieldInfoT fieldInfo
+);

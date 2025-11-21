@@ -8,7 +8,7 @@ namespace RLBot.Manager;
 /// <summary>
 /// A simple bot manager than runs each bot on a different thread.
 /// Ideal for simple hivemind bots that occasionally coordinate and share computation, but run mostly in parallel.
-/// Be mindful with shared resources and static variables when using this manager. 
+/// Be mindful with shared resources and static variables when using this manager.
 /// The manager handles the bots' life-cycle including initialization, packet reading loop, and retirement on disconnect.
 /// </summary>
 /// <param name="rlbot">An rlbot connection interface</param>
@@ -20,8 +20,7 @@ public class MultiThreadBotManager(
     RLBotInterface rlbot,
     string? defaultAgentId,
     BotFactory botFactory
-)
-    : AgentBaseManager(rlbot, defaultAgentId)
+) : AgentBaseManager(rlbot, defaultAgentId)
 {
     private class BoxedBool(bool val)
     {
@@ -29,16 +28,24 @@ public class MultiThreadBotManager(
     }
 
     private record struct GameTickData(GamePacketT Packet, BallPredictionT? BallPred);
-    
-    private record BotInfo(IBot Bot, string Name, int Index, Thread Thread, BoxedBool Running, BlockingCollection<GameTickData> Queue, ConcurrentQueue<MatchCommT> MatchComms);
-    
+
+    private record BotInfo(
+        IBot Bot,
+        string Name,
+        int Index,
+        Thread Thread,
+        BoxedBool Running,
+        BlockingCollection<GameTickData> Queue,
+        ConcurrentQueue<MatchCommT> MatchComms
+    );
+
     private readonly List<BotInfo> _botInfos = new();
 
     protected override void Initialize()
     {
         Debug.Assert(_botInfos.Count == 0);
-        
-        // Initialize bots and start threads 
+
+        // Initialize bots and start threads
         var playerConfs = MatchConfig.PlayerConfigurations;
         var team = TeamInfo.Team;
         foreach (var agent in TeamInfo.Controllables)
@@ -46,9 +53,19 @@ public class MultiThreadBotManager(
             var index = (int)agent.Index;
             var name = playerConfs[index].Variety.AsCustomBot().Name;
             var bot = botFactory(Rlbot, index, team, name, AgentId, MatchConfig, FieldInfo);
-            var queue = new BlockingCollection<GameTickData>(new ConcurrentQueue<GameTickData>());
+            var queue = new BlockingCollection<GameTickData>(
+                new ConcurrentQueue<GameTickData>()
+            );
             var matchComms = new ConcurrentQueue<MatchCommT>();
-            var info = new BotInfo(bot, name, index, new Thread(BotLoop), new BoxedBool(true), queue, matchComms);
+            var info = new BotInfo(
+                bot,
+                name,
+                index,
+                new Thread(BotLoop),
+                new BoxedBool(true),
+                queue,
+                matchComms
+            );
             _botInfos.Add(info);
             info.Thread.Start(info);
         }
@@ -59,11 +76,9 @@ public class MultiThreadBotManager(
             var loadout = info.Bot.GetInitialLoadout();
             if (loadout != null)
             {
-                Rlbot.SendSetLoadout(new SetLoadoutT
-                {
-                    Index = (uint)info.Index,
-                    Loadout = loadout
-                });
+                Rlbot.SendSetLoadout(
+                    new SetLoadoutT { Index = (uint)info.Index, Loadout = loadout }
+                );
             }
         }
     }
@@ -84,11 +99,15 @@ public class MultiThreadBotManager(
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError("{} encountered an error while processing match comms: {}", info.Name, e);
+                        Logger.LogError(
+                            "{} encountered an error while processing match comms: {}",
+                            info.Name,
+                            e
+                        );
                         return;
                     }
                 }
-                
+
                 // Game packet (temp blocking)
                 if (!info.Queue.TryTake(out var data, 200))
                 {
@@ -102,17 +121,23 @@ public class MultiThreadBotManager(
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError("{} encountered an error while processing game packet: {}", info.Name, e);
+                    Logger.LogError(
+                        "{} encountered an error while processing game packet: {}",
+                        info.Name,
+                        e
+                    );
                     return;
                 }
 
                 if (ctrl != null)
                 {
-                    Rlbot.SendPlayerInput(new PlayerInputT
-                    {
-                        PlayerIndex = (uint)info.Index,
-                        ControllerState = ctrl
-                    });
+                    Rlbot.SendPlayerInput(
+                        new PlayerInputT
+                        {
+                            PlayerIndex = (uint)info.Index,
+                            ControllerState = ctrl,
+                        }
+                    );
                 }
             }
         }

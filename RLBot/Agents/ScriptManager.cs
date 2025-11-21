@@ -5,7 +5,13 @@ namespace RLBot.Manager;
 
 /// <summary>A delegate for methods that can create <see cref="IScript"/> instances.</summary>
 /// <seealso cref="ScriptManager"/>
-public delegate IScript ScriptFactory(RLBotInterface rlbot, int index, string agentId, MatchConfigurationT matchConfig, FieldInfoT fieldInfo);
+public delegate IScript ScriptFactory(
+    RLBotInterface rlbot,
+    int index,
+    string agentId,
+    MatchConfigurationT matchConfig,
+    FieldInfoT fieldInfo
+);
 
 /// <summary>
 /// A simple manager for scripts. Scripts observe the match and potentially uses debug rendering, state-setting, or match comms.

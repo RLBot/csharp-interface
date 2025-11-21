@@ -19,41 +19,50 @@ public class HivemindManager(
     RLBotInterface rlbot,
     string? defaultAgentId,
     HivemindFactory hivemindFactory
-)
-    : AgentBaseManager(rlbot, defaultAgentId)
+) : AgentBaseManager(rlbot, defaultAgentId)
 {
     private IHivemind? _hivemind;
     private List<int> _indices = new();
     private uint _team;
-    
+
     protected override void Initialize()
     {
         Debug.Assert(_hivemind == null && _indices.Count == 0);
-        
+
         var playerConfs = MatchConfig.PlayerConfigurations;
         _team = TeamInfo.Team;
         _indices = TeamInfo.Controllables.Select(a => (int)a.Index).ToList();
-        var names = _indices.ToDictionary(i => i, i => playerConfs[i].Variety.AsCustomBot().Name);
-        
-        _hivemind = hivemindFactory(Rlbot, _indices, _team, names, AgentId, MatchConfig, FieldInfo);
+        var names = _indices.ToDictionary(
+            i => i,
+            i => playerConfs[i].Variety.AsCustomBot().Name
+        );
+
+        _hivemind = hivemindFactory(
+            Rlbot,
+            _indices,
+            _team,
+            names,
+            AgentId,
+            MatchConfig,
+            FieldInfo
+        );
 
         var loadouts = _hivemind.GetInitialLoadouts();
         if (loadouts != null)
         {
             foreach (var loadout in loadouts)
             {
-                Rlbot.SendSetLoadout(new SetLoadoutT
-                {
-                    Index = (uint)loadout.Key,
-                    Loadout = loadout.Value
-                });
+                Rlbot.SendSetLoadout(
+                    new SetLoadoutT { Index = (uint)loadout.Key, Loadout = loadout.Value }
+                );
             }
         }
     }
 
     protected override void ProcessPacket()
     {
-        if (_hivemind == null) return;
+        if (_hivemind == null)
+            return;
 
         IDictionary<int, ControllerStateT>? controllers = null;
         try
@@ -62,25 +71,33 @@ public class HivemindManager(
         }
         catch (Exception e)
         {
-            Logger.LogError("Hivemind '{}' (team {}) encountered an error while processing game packet: {}", AgentId, _team, e);
+            Logger.LogError(
+                "Hivemind '{}' (team {}) encountered an error while processing game packet: {}",
+                AgentId,
+                _team,
+                e
+            );
         }
 
         if (controllers != null)
         {
             foreach (var ctrl in controllers)
             {
-                Rlbot.SendPlayerInput(new PlayerInputT
-                {
-                    PlayerIndex = (uint)ctrl.Key,
-                    ControllerState = ctrl.Value
-                });
+                Rlbot.SendPlayerInput(
+                    new PlayerInputT
+                    {
+                        PlayerIndex = (uint)ctrl.Key,
+                        ControllerState = ctrl.Value,
+                    }
+                );
             }
         }
     }
 
     protected override void HandleMatchComm(MatchCommT msg)
     {
-        if (_hivemind == null) return;
+        if (_hivemind == null)
+            return;
 
         try
         {
@@ -88,21 +105,32 @@ public class HivemindManager(
         }
         catch (Exception e)
         {
-            Logger.LogError("Hivemind '{}' (team {}) encountered an error while processing match comms: {}", AgentId, _team, e);
+            Logger.LogError(
+                "Hivemind '{}' (team {}) encountered an error while processing match comms: {}",
+                AgentId,
+                _team,
+                e
+            );
         }
     }
 
     protected override void Retire()
     {
-        if (_hivemind == null) return;
-        
+        if (_hivemind == null)
+            return;
+
         try
         {
             _hivemind.OnRetire();
         }
         catch (Exception e)
         {
-            Logger.LogError("Hivemind '{}' (team {}) encountered an error while retiring: {}", AgentId, _team, e);
+            Logger.LogError(
+                "Hivemind '{}' (team {}) encountered an error while retiring: {}",
+                AgentId,
+                _team,
+                e
+            );
         }
     }
 }

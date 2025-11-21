@@ -17,8 +17,7 @@ public class SingleThreadBotManager(
     RLBotInterface rlbot,
     string defaultAgentId,
     BotFactory botFactory
-)
-    : AgentBaseManager(rlbot, defaultAgentId)
+) : AgentBaseManager(rlbot, defaultAgentId)
 {
     private record BotInfo(IBot Bot, string Name, int Index);
 
