@@ -9,56 +9,30 @@ RLBotInterface rlbot = new();
 SingleThreadBotManager manager = new(
     rlbot,
     "test/csharp_atba",
-    (rlbot, index, team, name, agentId, matchConfig, fieldInfo) =>
-        new Atba(rlbot, index, team, name, agentId, matchConfig, fieldInfo)
+    botParams => new Atba(botParams)
 );
 manager.Run();
 
-internal class Atba : IBot
+internal class Atba : AbstractBot
 {
     private readonly Logging _logger = new Logging(nameof(Atba), LogLevel.Information);
 
-    public readonly RLBotInterface Rlbot;
-    public readonly int Index;
-    public readonly uint Team;
-    public readonly string Name;
-    public readonly string AgentId;
-    public readonly MatchConfigurationT MatchConfig;
-    public readonly FieldInfoT FieldInfo;
-
     public readonly Renderer Renderer;
 
-    public Atba(
-        RLBotInterface rlbot,
-        int index,
-        uint team,
-        string name,
-        string agentId,
-        MatchConfigurationT matchConfig,
-        FieldInfoT fieldInfo
-    )
+    public Atba(BotInitParams botParams) : base(botParams)
     {
-        Rlbot = rlbot;
-        Index = index;
-        Team = team;
-        Name = name;
-        AgentId = agentId;
-        MatchConfig = matchConfig;
-        FieldInfo = fieldInfo;
-        Renderer = new(rlbot);
-
         _logger.LogInformation("Initializing agent!");
+        Renderer = new(Rlbot);
 
-        int numBoostPads = fieldInfo.BoostPads.Count;
-        _logger.LogInformation($"There are {numBoostPads} boost pads on the field.");
+        _logger.LogInformation($"There are {FieldInfo.BoostPads.Count} boost pads on the field.");
     }
 
-    public PlayerLoadoutT? GetInitialLoadout()
+    public override PlayerLoadoutT? GetInitialLoadout()
     {
         return null; // Use the loadout declared in bot.toml
     }
 
-    public ControllerStateT GetOutput(GamePacketT packet, BallPredictionT? ballPrediction)
+    public override ControllerStateT GetOutput(GamePacketT packet, BallPredictionT? ballPrediction)
     {
         ControllerStateT controller = new();
 
@@ -89,7 +63,7 @@ internal class Atba : IBot
         return controller;
     }
 
-    public void OnMatchCommReceived(MatchCommT msg) { }
+    public override void OnMatchCommReceived(MatchCommT msg) { }
 
-    public void OnRetire() { }
+    public override void OnRetire() { }
 }

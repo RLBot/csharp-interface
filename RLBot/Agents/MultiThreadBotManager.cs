@@ -52,7 +52,7 @@ public class MultiThreadBotManager(
         {
             var index = (int)agent.Index;
             var name = playerConfs[index].Variety.AsCustomBot().Name;
-            var bot = botFactory(Rlbot, index, team, name, AgentId, MatchConfig, FieldInfo);
+            var bot = botFactory(new BotInitParams(Rlbot, index, team, name, AgentId, MatchConfig, FieldInfo));
             var queue = new BlockingCollection<GameTickData>(
                 new ConcurrentQueue<GameTickData>()
             );

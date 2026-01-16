@@ -33,7 +33,7 @@ public class SingleThreadBotManager(
         {
             var index = (int)agent.Index;
             var name = playerConfigs[index].Variety.AsCustomBot().Name;
-            var bot = botFactory(Rlbot, index, team, name, AgentId, MatchConfig, FieldInfo);
+            var bot = botFactory(new BotInitParams(Rlbot, index, team, name, AgentId, MatchConfig, FieldInfo));
             var process = new BotInfo(bot, name, index);
             _botInfos.Add(process);
         }

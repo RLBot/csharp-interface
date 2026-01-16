@@ -8,44 +8,26 @@ using Vector3 = System.Numerics.Vector3;
 var manager = new ScriptManager(
     new RLBotInterface(),
     "test/csharp_script",
-    (rlbot, index, agentId, matchConfig, fieldInfo) =>
-        new TestScript(rlbot, index, agentId, matchConfig, fieldInfo)
+    scriptParams => new TestScript(scriptParams)
 );
 manager.Run();
 
-class TestScript : IScript
+class TestScript : AbstractScript
 {
     private readonly Logging _logger = new Logging(nameof(TestScript), LogLevel.Information);
-
-    public readonly RLBotInterface Rlbot;
-    public readonly int Index;
-    public readonly string AgentId;
-    public readonly MatchConfigurationT MatchConfig;
-    public readonly FieldInfoT FieldInfo;
 
     public readonly Renderer Renderer;
 
     private float _next = 10f;
 
-    public TestScript(
-        RLBotInterface rlbot,
-        int index,
-        string agentId,
-        MatchConfigurationT matchConfig,
-        FieldInfoT fieldInfo
-    )
+    public TestScript(ScriptInitParams scriptParams) : base(scriptParams)
     {
-        Rlbot = rlbot;
-        Index = index;
-        AgentId = agentId;
-        MatchConfig = matchConfig;
-        FieldInfo = fieldInfo;
-        Renderer = new Renderer(rlbot);
+        Renderer = new Renderer(Rlbot);
 
         _logger.LogInformation("Test script initialized!");
     }
 
-    public void ProcessPacket(GamePacketT packet, BallPredictionT? ballPred)
+    public override void ProcessPacket(GamePacketT packet, BallPredictionT? ballPred)
     {
         if (
             packet.MatchInfo.SecondsElapsed < _next
@@ -69,7 +51,7 @@ class TestScript : IScript
         _next = packet.MatchInfo.SecondsElapsed + 10f;
     }
 
-    public void OnMatchCommReceived(MatchCommT msg) { }
+    public override void OnMatchCommReceived(MatchCommT msg) { }
 
-    public void OnRetire() { }
+    public override void OnRetire() { }
 }

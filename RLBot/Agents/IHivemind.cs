@@ -50,3 +50,64 @@ public delegate IHivemind HivemindFactory(
     MatchConfigurationT matchConfig,
     FieldInfoT fieldInfo
 );
+
+/// <summary>
+/// A plain struct containing the parameters of a hivemind.
+/// </summary>
+/// <param name="rlbot">A reference to the RLBotInterface for communication with the server.</param>
+/// <param name="indices">The bot indices that the hivemind controls.</param>
+/// <param name="team">The team of the hivemind.</param>
+/// <param name="names">A mapping from bot index to bot name as it appears in-game.</param>
+/// <param name="agentId">The agent id of the bot.</param>
+/// <param name="matchConfig">The match configuration defining the current match.</param>
+/// <param name="fieldInfo">Static information about the map such as boost pad layout.</param>
+public struct HivemindInitParams(
+    RLBotInterface rlbot,
+    List<int> indices,
+    uint team,
+    Dictionary<int, string> names,
+    string agentId,
+    MatchConfigurationT matchConfig,
+    FieldInfoT fieldInfo
+)
+{
+    public readonly RLBotInterface Rlbot = rlbot;
+    public readonly List<int> Indices = indices;
+    public readonly uint Team = team;
+    public readonly Dictionary<int, string> Names = names;
+    public readonly string AgentId = agentId;
+    public readonly MatchConfigurationT MatchConfig = matchConfig;
+    public readonly FieldInfoT FieldInfo = fieldInfo;
+}
+
+/// <summary>
+/// An abstract hivemind. Declares fields for the hivemind parameters but is otherwise empty. 
+/// </summary>
+public abstract class AbstractHivemind(HivemindInitParams hivemindParams) : IHivemind
+{
+    /// A reference to the RLBotInterface for communication with the server.
+    public readonly RLBotInterface Rlbot = hivemindParams.Rlbot;
+    
+    /// The bot indices that the hivemind controls.
+    public readonly List<int> Indices = hivemindParams.Indices;
+    
+    /// The team of the hivemind.
+    public readonly uint Team = hivemindParams.Team;
+    
+    /// A mapping from bot index to bot name as it appears in-game.
+    public readonly Dictionary<int, string> Names = hivemindParams.Names;
+    
+    /// The agent id of the bot.
+    public readonly string AgentId = hivemindParams.AgentId;
+    
+    /// The match configuration defining the current match.
+    public readonly MatchConfigurationT MatchConfig = hivemindParams.MatchConfig;
+    
+    /// Static information about the map such as boost pad layout.
+    public readonly FieldInfoT FieldInfo = hivemindParams.FieldInfo;
+
+    public abstract IDictionary<int, PlayerLoadoutT>? GetInitialLoadouts();
+    public abstract IDictionary<int, ControllerStateT>? GetOutputs(GamePacketT packet, BallPredictionT? ballPred);
+    public abstract void OnMatchCommReceived(MatchCommT msg);
+    public abstract void OnRetire();
+} 
