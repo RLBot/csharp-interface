@@ -75,27 +75,30 @@ public abstract class AbstractBot(BotInitParams botParams) : IBot
 {
     /// A reference to the RLBotInterface for communication with the server.
     public readonly RLBotInterface Rlbot = botParams.Rlbot;
-        
+
     /// The index of the bot.
     public readonly int Index = botParams.Index;
-    
+
     /// The team of the bot.
     public readonly uint Team = botParams.Team;
-    
+
     /// The name of the bot as it appears in-game.
     public readonly string Name = botParams.Name;
-    
+
     /// The agent id of the bot.
     public readonly string AgentId = botParams.AgentId;
-    
+
     /// The match configuration defining the current match.
     public readonly MatchConfigurationT MatchConfig = botParams.MatchConfig;
-    
+
     /// Static information about the map such as boost pad layout.
     public readonly FieldInfoT FieldInfo = botParams.FieldInfo;
 
     public abstract PlayerLoadoutT? GetInitialLoadout();
-    public abstract ControllerStateT? GetOutput(GamePacketT packet, BallPredictionT? ballPrediction);
+    public abstract ControllerStateT? GetOutput(
+        GamePacketT packet,
+        BallPredictionT? ballPrediction
+    );
     public abstract void OnMatchCommReceived(MatchCommT msg);
     public abstract void OnRetire();
 }

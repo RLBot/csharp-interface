@@ -19,12 +19,15 @@ internal class Atba : AbstractBot
 
     public readonly Renderer Renderer;
 
-    public Atba(BotInitParams botParams) : base(botParams)
+    public Atba(BotInitParams botParams)
+        : base(botParams)
     {
         _logger.LogInformation("Initializing agent!");
         Renderer = new(Rlbot);
 
-        _logger.LogInformation($"There are {FieldInfo.BoostPads.Count} boost pads on the field.");
+        _logger.LogInformation(
+            $"There are {FieldInfo.BoostPads.Count} boost pads on the field."
+        );
     }
 
     public override PlayerLoadoutT? GetInitialLoadout()
@@ -32,7 +35,10 @@ internal class Atba : AbstractBot
         return null; // Use the loadout declared in bot.toml
     }
 
-    public override ControllerStateT GetOutput(GamePacketT packet, BallPredictionT? ballPrediction)
+    public override ControllerStateT GetOutput(
+        GamePacketT packet,
+        BallPredictionT? ballPrediction
+    )
     {
         ControllerStateT controller = new();
 

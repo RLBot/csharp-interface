@@ -66,14 +66,17 @@ public abstract class AbstractScript(ScriptInitParams scriptParams) : IScript
 
     /// The agent id of the script.
     public readonly string AgentId = scriptParams.AgentId;
-    
+
     /// The match configuration defining the current match.
     public readonly MatchConfigurationT MatchConfig = scriptParams.MatchConfig;
-    
+
     /// Static information about the map such as boost pad layout.
     public readonly FieldInfoT FieldInfo = scriptParams.FieldInfo;
 
-    public abstract void ProcessPacket(GamePacketT gamePacket, BallPredictionT? ballPrediction);
+    public abstract void ProcessPacket(
+        GamePacketT gamePacket,
+        BallPredictionT? ballPrediction
+    );
     public abstract void OnMatchCommReceived(MatchCommT msg);
     public abstract void OnRetire();
 }

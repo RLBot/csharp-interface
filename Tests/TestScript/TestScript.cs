@@ -20,7 +20,8 @@ class TestScript : AbstractScript
 
     private float _next = 10f;
 
-    public TestScript(ScriptInitParams scriptParams) : base(scriptParams)
+    public TestScript(ScriptInitParams scriptParams)
+        : base(scriptParams)
     {
         Renderer = new Renderer(Rlbot);
 

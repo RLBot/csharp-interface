@@ -81,33 +81,36 @@ public struct HivemindInitParams(
 }
 
 /// <summary>
-/// An abstract hivemind. Declares fields for the hivemind parameters but is otherwise empty. 
+/// An abstract hivemind. Declares fields for the hivemind parameters but is otherwise empty.
 /// </summary>
 public abstract class AbstractHivemind(HivemindInitParams hivemindParams) : IHivemind
 {
     /// A reference to the RLBotInterface for communication with the server.
     public readonly RLBotInterface Rlbot = hivemindParams.Rlbot;
-    
+
     /// The bot indices that the hivemind controls.
     public readonly List<int> Indices = hivemindParams.Indices;
-    
+
     /// The team of the hivemind.
     public readonly uint Team = hivemindParams.Team;
-    
+
     /// A mapping from bot index to bot name as it appears in-game.
     public readonly Dictionary<int, string> Names = hivemindParams.Names;
-    
+
     /// The agent id of the bot.
     public readonly string AgentId = hivemindParams.AgentId;
-    
+
     /// The match configuration defining the current match.
     public readonly MatchConfigurationT MatchConfig = hivemindParams.MatchConfig;
-    
+
     /// Static information about the map such as boost pad layout.
     public readonly FieldInfoT FieldInfo = hivemindParams.FieldInfo;
 
     public abstract IDictionary<int, PlayerLoadoutT>? GetInitialLoadouts();
-    public abstract IDictionary<int, ControllerStateT>? GetOutputs(GamePacketT packet, BallPredictionT? ballPred);
+    public abstract IDictionary<int, ControllerStateT>? GetOutputs(
+        GamePacketT packet,
+        BallPredictionT? ballPred
+    );
     public abstract void OnMatchCommReceived(MatchCommT msg);
     public abstract void OnRetire();
-} 
+}

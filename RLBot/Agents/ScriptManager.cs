@@ -25,7 +25,9 @@ public class ScriptManager(
         var agent = TeamInfo.Controllables[0];
         _index = (int)agent.Index;
         _name = MatchConfig.ScriptConfigurations[_index].Name;
-        _script = scriptFactory(new ScriptInitParams(Rlbot, _index, AgentId, MatchConfig, FieldInfo));
+        _script = scriptFactory(
+            new ScriptInitParams(Rlbot, _index, AgentId, MatchConfig, FieldInfo)
+        );
     }
 
     protected override void ProcessPacket()
