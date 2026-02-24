@@ -27,7 +27,7 @@ class SpecStreamReader
         _bufferedStream.ReadExactly(_ushortReader);
         payloadSize = ReadBigEndian(_ushortReader);
         _bufferedStream.ReadExactly(_payloadReader, 0, payloadSize);
-        
+
         ByteBuffer byteBuffer = new(_payloadReader, 0);
         return CorePacket.GetRootAsCorePacket(byteBuffer);
     }

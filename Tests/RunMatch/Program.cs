@@ -1,4 +1,4 @@
-using RLBot.Manager;
+using RLBot;
 
 if (args.Length == 0)
 {
@@ -6,14 +6,14 @@ if (args.Length == 0)
     return;
 }
 
-string matchConfigPath = args[0];
-Match matchManager = new();
-matchManager.StartMatch(matchConfigPath);
+RLBotInterface rlbot = new RLBotInterface();
+rlbot.ConnectAsMatchHost();
+rlbot.StartMatch(args[0]);
 
-// wait
+// Wait
 Console.WriteLine("\nPress enter to end the match: ");
 Console.ReadLine();
 
-// end the match and disconnect
-matchManager.StopMatch();
-matchManager.Disconnect();
+// End the match and disconnect
+rlbot.StopMatch();
+rlbot.Disconnect();

@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using RLBot.Flat;
+using RLBot.GameState;
 using RLBot.Util;
 
 namespace RLBot;
@@ -11,16 +12,19 @@ public class RLBotInterface
 {
     public const int DEFAULT_RLBOT_SERVER_PORT = 23234;
 
-    public bool IsConnected { get; private set; } = false;
-    private bool _running = false;
+    private readonly Logging _logger = new Logging(
+        nameof(RLBotInterface),
+        LogLevel.Information
+    );
 
+    public bool IsConnected { get; private set; } = false;
     private readonly int _connectionTimeout;
-    private readonly Logging _logger;
     private readonly TcpClient _client = new();
     private SpecStreamReader? _socketSpecReader;
     private SpecStreamWriter? _socketSpecWriter;
 
-    public readonly string AgentId;
+    public bool IsRunning { get; private set; } = false;
+
     public event Action OnConnectCallback = delegate { };
     public event Action<GamePacketT> OnGamePacketCallback = delegate { };
     public event Action<FieldInfoT> OnFieldInfoCallback = delegate { };
@@ -31,20 +35,9 @@ public class RLBotInterface
     public event Action<RenderingStatusT> OnRenderingStatusCallback = delegate { };
     public event Action<CorePacketT> OnAnyMessageCallback = delegate { };
 
-    public RLBotInterface(string agentId, int connectionTimeout = 120, Logging? logger = null)
+    public RLBotInterface(int connectionTimeout = 120)
     {
-        AgentId = agentId;
         _connectionTimeout = connectionTimeout;
-
-        if (logger is null)
-        {
-            _logger = new Logging("Interface", LogLevel.Information);
-        }
-        else
-        {
-            _logger = logger;
-        }
-
         _client.NoDelay = true;
     }
 
@@ -83,6 +76,25 @@ public class RLBotInterface
         SendFlatBuffer(InterfaceMessageUnion.FromDesiredGameState(gameState));
     }
 
+    public void SendGameState(
+        Dictionary<int, DesiredBallStateT>? balls = null,
+        Dictionary<int, DesiredCarStateT>? cars = null,
+        DesiredMatchInfoT? matchInfo = null,
+        List<ConsoleCommandT>? commands = null
+    )
+    {
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
+        SendGameState(gameState);
+    }
+
+    /// <summary>
+    /// Modify the current game state using a builder pattern.
+    /// </summary>
+    public DesiredGameStateBuilder GameStateBuilder()
+    {
+        return new DesiredGameStateBuilder(this);
+    }
+
     public void SendRenderGroup(RenderGroupT renderGroup)
     {
         SendFlatBuffer(InterfaceMessageUnion.FromRenderGroup(renderGroup));
@@ -112,18 +124,40 @@ public class RLBotInterface
         var attr = File.GetAttributes(matchConfigPath);
         if (attr.HasFlag(FileAttributes.Directory))
             throw new ArgumentException(
-                $"Expected path to file, but it is a directory: {matchConfigPath}"
+                $"Expected path to file, but found a directory: {matchConfigPath}"
             );
 
         var startCommand = new StartCommandT { ConfigPath = matchConfigPath };
         SendFlatBuffer(InterfaceMessageUnion.FromStartCommand(startCommand));
+        SendInitComplete();
+    }
+
+    public void ConnectAsMatchHost(
+        bool wantsBallPredictions = false,
+        bool wantsMatchCommunications = false
+    )
+    {
+        Connect("", wantsBallPredictions, wantsMatchCommunications, true);
     }
 
     public void Connect(
+        string agentId,
         bool wantsMatchCommunications,
         bool wantsBallPredictions,
-        bool closeBetweenMatches = true,
-        int rlbotServerPort = DEFAULT_RLBOT_SERVER_PORT
+        bool outliveMatches
+    )
+    {
+        var portRaw = Environment.GetEnvironmentVariable("RLBOT_SERVER_PORT");
+        var port = portRaw == null ? DEFAULT_RLBOT_SERVER_PORT : int.Parse(portRaw);
+        Connect(agentId, wantsMatchCommunications, wantsBallPredictions, outliveMatches, port);
+    }
+
+    public void Connect(
+        string agentId,
+        bool wantsMatchCommunications,
+        bool wantsBallPredictions,
+        bool outliveMatches,
+        int rlbotServerPort
     )
     {
         if (IsConnected)
@@ -160,7 +194,8 @@ public class RLBotInterface
                     {
                         nextWarning *= 2;
                         _logger.LogWarning(
-                            "Connection is being refused/aborted. Trying again ..."
+                            "Failing to connect to RLBot on port {}. Trying again ...",
+                            rlbotServerPort
                         );
                     }
                 }
@@ -168,20 +203,15 @@ public class RLBotInterface
 
             if (!IsConnected)
             {
-                throw new SocketException(
-                    (int)SocketError.ConnectionRefused,
-                    "Connection was refused/aborted repeatedly! "
-                    + "Ensure that Rocket League and the RLBotServer is running. "
-                    + "Try calling `ensure_server_started()` before connecting."
+                throw new TimeoutException(
+                    "Failed to establish connection. Ensure that the RLBotServer is running."
                 );
             }
         }
-        catch (TimeoutException e)
+        catch (Exception e)
         {
             throw new TimeoutException(
-                "Took too long to connect to the RLBot! "
-                + "Ensure that Rocket League and the RLBotServer is running."
-                + "Try calling `ensure_server_started()` before connecting.",
+                "Failed to establish connection. Ensure that the RLBotServer is running.",
                 e
             );
         }
@@ -200,17 +230,17 @@ public class RLBotInterface
             localIpEndPoint!.Port
         );
 
-        OnConnectCallback();
-
         var connectionSettings = new ConnectionSettingsT
         {
-            AgentId = AgentId,
+            AgentId = agentId,
             WantsBallPredictions = wantsBallPredictions,
             WantsComms = wantsMatchCommunications,
-            CloseBetweenMatches = closeBetweenMatches,
+            CloseBetweenMatches = !outliveMatches,
         };
-        
+
         SendFlatBuffer(InterfaceMessageUnion.FromConnectionSettings(connectionSettings));
+
+        OnConnectCallback();
     }
 
     public void Run(bool backgroundThread = false)
@@ -220,7 +250,7 @@ public class RLBotInterface
             throw new Exception("Connection has not been established");
         }
 
-        if (_running)
+        if (IsRunning)
         {
             throw new Exception("Message handling is already running");
         }
@@ -231,13 +261,18 @@ public class RLBotInterface
         }
         else
         {
-            _running = true;
-            while (_running && IsConnected)
-                _running =
-                    HandleIncomingMessages(blocking: true) != MsgHandlingResult.Terminated;
+            IsRunning = true;
+            while (IsRunning && IsConnected)
+                IsRunning =
+                    HandleNextIncomingMessage(blocking: true) != MsgHandlingResult.Terminated;
 
-            _running = false;
+            IsRunning = false;
         }
+    }
+
+    public void StopRunning()
+    {
+        IsRunning = false;
     }
 
     public enum MsgHandlingResult
@@ -247,7 +282,7 @@ public class RLBotInterface
         MoreMsgsQueued,
     }
 
-    public MsgHandlingResult HandleIncomingMessages(bool blocking = false)
+    public MsgHandlingResult HandleNextIncomingMessage(bool blocking = false)
     {
         if (!IsConnected)
         {
@@ -262,14 +297,14 @@ public class RLBotInterface
 
             try
             {
-                return HandleIncomingMessage(packet)
+                return HandleMessage(packet)
                     ? MsgHandlingResult.MoreMsgsQueued
                     : MsgHandlingResult.Terminated;
             }
             catch (Exception e)
             {
                 _logger.LogError(
-                    "Unexpected error while handling message of type {0}: {1}",
+                    "Unexpected error while handling message of type {}: {}",
                     packet.Message.Type,
                     e
                 );
@@ -287,7 +322,7 @@ public class RLBotInterface
         }
     }
 
-    private bool HandleIncomingMessage(CorePacketT packet)
+    private bool HandleMessage(CorePacketT packet)
     {
         OnAnyMessageCallback(packet);
 
@@ -317,7 +352,8 @@ public class RLBotInterface
                 OnBallPredictionCallback(ballPrediction);
                 break;
             case CoreMessage.ControllableTeamInfo:
-                ControllableTeamInfoT controllableTeamInfo = packet.Message.AsControllableTeamInfo();
+                ControllableTeamInfoT controllableTeamInfo =
+                    packet.Message.AsControllableTeamInfo();
                 OnControllableTeamInfoCallback(controllableTeamInfo);
                 break;
             case CoreMessage.RenderingStatus:
@@ -325,7 +361,10 @@ public class RLBotInterface
                 OnRenderingStatusCallback(renderingStatus);
                 break;
             default:
-                _logger.LogWarning("Received message of unknown type: {0}", packet.Message.Type);
+                _logger.LogWarning(
+                    "Received message of unknown type: {0}",
+                    packet.Message.Type
+                );
                 break;
         }
 
@@ -340,11 +379,13 @@ public class RLBotInterface
             return;
         }
 
-        _socketSpecWriter!.Write(InterfaceMessageUnion.FromDisconnectSignal(new DisconnectSignalT()));
+        _socketSpecWriter!.Write(
+            InterfaceMessageUnion.FromDisconnectSignal(new DisconnectSignalT())
+        );
         _socketSpecWriter.Send();
 
         var timeout = 5.0;
-        while (_running && timeout > 0)
+        while (IsRunning && timeout > 0)
         {
             Thread.Sleep(100);
             timeout -= 0.1;
@@ -353,11 +394,11 @@ public class RLBotInterface
         if (timeout <= 0)
         {
             _logger.LogCritical("RLBot is not responding to our disconnect request!?");
-            _running = false;
+            IsRunning = false;
         }
 
         Debug.Assert(
-            !_running,
+            !IsRunning,
             "Disconnect request or timeout should have set _running to False"
         );
 

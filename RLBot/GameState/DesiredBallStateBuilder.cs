@@ -12,7 +12,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState = ballState;
         ballState.Physics ??= new DesiredPhysicsT();
     }
-    
+
     /// <summary>
     /// Set the desired location of the ball.
     /// </summary>
@@ -22,11 +22,11 @@ public readonly struct DesiredBallStateBuilder
         {
             X = new FloatT { Val = location.X },
             Y = new FloatT { Val = location.Y },
-            Z = new FloatT { Val = location.Z }
+            Z = new FloatT { Val = location.Z },
         };
         return this;
     }
-    
+
     /// <summary>
     /// Set the desired location of the ball.
     /// </summary>
@@ -36,7 +36,7 @@ public readonly struct DesiredBallStateBuilder
         {
             X = new FloatT { Val = location.X },
             Y = new FloatT { Val = location.Y },
-            Z = new FloatT { Val = location.Z }
+            Z = new FloatT { Val = location.Z },
         };
         return this;
     }
@@ -50,7 +50,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Location.X = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Y value of the desired location of the ball.
     /// </summary>
@@ -60,7 +60,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Location.Y = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Z value of the desired location of the ball.
     /// </summary>
@@ -70,7 +70,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Location.Z = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the desired velocity of the ball.
     /// </summary>
@@ -80,7 +80,7 @@ public readonly struct DesiredBallStateBuilder
         {
             X = new FloatT { Val = velocity.X },
             Y = new FloatT { Val = velocity.Y },
-            Z = new FloatT { Val = velocity.Z }
+            Z = new FloatT { Val = velocity.Z },
         };
         return this;
     }
@@ -94,7 +94,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Velocity.X = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Y value of the desired velocity of the ball.
     /// </summary>
@@ -104,7 +104,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Velocity.Y = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Z value of the desired velocity of the ball.
     /// </summary>
@@ -114,7 +114,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Velocity.Z = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the desired angular velocity of the ball.
     /// </summary>
@@ -124,7 +124,7 @@ public readonly struct DesiredBallStateBuilder
         {
             X = new FloatT { Val = angVel.X },
             Y = new FloatT { Val = angVel.Y },
-            Z = new FloatT { Val = angVel.Z }
+            Z = new FloatT { Val = angVel.Z },
         };
         return this;
     }
@@ -138,7 +138,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.AngularVelocity.X = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Y value of the desired angular velocity of the ball.
     /// </summary>
@@ -148,7 +148,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.AngularVelocity.Y = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the Z value of the desired angular velocity of the ball.
     /// </summary>
@@ -158,7 +158,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.AngularVelocity.Z = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the desired rotation of the ball.
     /// </summary>
@@ -168,11 +168,11 @@ public readonly struct DesiredBallStateBuilder
         {
             Pitch = new FloatT { Val = rotation.X },
             Yaw = new FloatT { Val = rotation.Y },
-            Roll = new FloatT { Val = rotation.Z }
+            Roll = new FloatT { Val = rotation.Z },
         };
         return this;
     }
-    
+
     /// <summary>
     /// Set the desired rotation of the ball.
     /// </summary>
@@ -182,7 +182,7 @@ public readonly struct DesiredBallStateBuilder
         {
             Pitch = new FloatT { Val = rotation.Pitch },
             Yaw = new FloatT { Val = rotation.Yaw },
-            Roll = new FloatT { Val = rotation.Roll }
+            Roll = new FloatT { Val = rotation.Roll },
         };
         return this;
     }
@@ -196,7 +196,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Rotation.Pitch = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the yaw value of the desired rotation of the ball.
     /// </summary>
@@ -206,7 +206,7 @@ public readonly struct DesiredBallStateBuilder
         _ballState.Physics.Rotation.Yaw = new FloatT { Val = value };
         return this;
     }
-    
+
     /// <summary>
     /// Set the roll value of the desired rotation of the ball.
     /// </summary>

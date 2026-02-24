@@ -14,7 +14,9 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
     /// <summary>
     /// Modify the desired match info.
     /// </summary>
-    public DesiredGameStateBuilder MatchInfo(Func<DesiredMatchInfoBuilder, DesiredMatchInfoBuilder> build)
+    public DesiredGameStateBuilder MatchInfo(
+        Func<DesiredMatchInfoBuilder, DesiredMatchInfoBuilder> build
+    )
     {
         var builder = new DesiredMatchInfoBuilder(_state.MatchInfo ?? new DesiredMatchInfoT());
         build(builder);
@@ -24,7 +26,10 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
     /// <summary>
     /// Modify the desired car state at the given index.
     /// </summary>
-    public DesiredGameStateBuilder Car(int index, Func<DesiredCarStateBuilder, DesiredCarStateBuilder> build)
+    public DesiredGameStateBuilder Car(
+        int index,
+        Func<DesiredCarStateBuilder, DesiredCarStateBuilder> build
+    )
     {
         while (_state.CarStates.Count <= index)
         {
@@ -39,8 +44,10 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
     /// <summary>
     /// Modify the desired cars at the given indices.
     /// </summary>
-    public DesiredGameStateBuilder Cars(IEnumerable<int> indices,
-        Func<int, DesiredCarStateBuilder, DesiredCarStateBuilder> build)
+    public DesiredGameStateBuilder Cars(
+        IEnumerable<int> indices,
+        Func<int, DesiredCarStateBuilder, DesiredCarStateBuilder> build
+    )
     {
         foreach (var index in indices)
         {
@@ -54,11 +61,14 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
         }
         return this;
     }
-    
+
     /// <summary>
     /// Modify the desired ball state at the given index.
     /// </summary>
-    public DesiredGameStateBuilder Ball(int index, Func<DesiredBallStateBuilder, DesiredBallStateBuilder> build)
+    public DesiredGameStateBuilder Ball(
+        int index,
+        Func<DesiredBallStateBuilder, DesiredBallStateBuilder> build
+    )
     {
         while (_state.BallStates.Count <= index)
         {
@@ -71,10 +81,12 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
     }
 
     /// <summary>
-    /// Modify the desired balls at the given indices. 
+    /// Modify the desired balls at the given indices.
     /// </summary>
-    public DesiredGameStateBuilder Balls(IEnumerable<int> indices,
-        Func<int, DesiredBallStateBuilder, DesiredBallStateBuilder> build)
+    public DesiredGameStateBuilder Balls(
+        IEnumerable<int> indices,
+        Func<int, DesiredBallStateBuilder, DesiredBallStateBuilder> build
+    )
     {
         foreach (var index in indices)
         {
