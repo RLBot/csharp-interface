@@ -79,12 +79,29 @@ public class RLBotInterface
     public void SendGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredMatchInfoT? matchInfo = null,
-        List<ConsoleCommandT>? commands = null
+        DesiredMatchInfoT? matchInfo = null
     )
     {
-        var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo, commands);
+        var gameState = GameStateExt.FillDesiredGameState(balls, cars, matchInfo);
         SendGameState(gameState);
+    }
+
+    /// <summary>
+    /// Run a console command in Rocket League.
+    /// Find known console commands at https://wiki.rlbot.org/v5/framework/console-commands/
+    /// </summary>
+    public void SendConsoleCommand(ConsoleCommandT command)
+    {
+        SendFlatBuffer(InterfaceMessageUnion.FromConsoleCommand(command));
+    }
+
+    /// <summary>
+    /// Run a console command in Rocket League.
+    /// Find known console commands at https://wiki.rlbot.org/v5/framework/console-commands/
+    /// </summary>
+    public void SendConsoleCommand(string command)
+    {
+        SendConsoleCommand(new ConsoleCommandT { Command = command });
     }
 
     /// <summary>

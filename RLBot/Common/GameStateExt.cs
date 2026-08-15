@@ -7,14 +7,12 @@ static class GameStateExt
     public static DesiredGameStateT FillDesiredGameState(
         Dictionary<int, DesiredBallStateT>? balls = null,
         Dictionary<int, DesiredCarStateT>? cars = null,
-        DesiredMatchInfoT? matchInfo = null,
-        List<ConsoleCommandT>? commands = null
+        DesiredMatchInfoT? matchInfo = null
     )
     {
         var gameState = new DesiredGameStateT
         {
             MatchInfo = matchInfo,
-            ConsoleCommands = commands ?? new List<ConsoleCommandT>(),
         };
 
         if (balls != null)

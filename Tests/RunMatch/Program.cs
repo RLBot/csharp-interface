@@ -10,6 +10,8 @@ RLBotInterface rlbot = new RLBotInterface();
 rlbot.ConnectAsMatchHost();
 rlbot.StartMatch(args[0]);
 
+rlbot.SendConsoleCommand("HUDCycle");
+
 // Wait
 Console.WriteLine("\nPress enter to end the match: ");
 Console.ReadLine();

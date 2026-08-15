@@ -8,7 +8,6 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
     {
         BallStates = new(),
         CarStates = new(),
-        ConsoleCommands = new(),
     };
 
     /// <summary>
@@ -98,15 +97,6 @@ public struct DesiredGameStateBuilder(RLBotInterface rlbotInterface)
             var builder = new DesiredBallStateBuilder(_state.BallStates[index]);
             build(index, builder);
         }
-        return this;
-    }
-
-    /// <summary>
-    /// Add a console command.
-    /// </summary>
-    public DesiredGameStateBuilder Command(string cmd)
-    {
-        _state.ConsoleCommands.Add(new() { Command = cmd });
         return this;
     }
 
