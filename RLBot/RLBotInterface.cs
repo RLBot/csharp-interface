@@ -33,6 +33,7 @@ public class RLBotInterface
     public event Action<BallPredictionT> OnBallPredictionCallback = delegate { };
     public event Action<ControllableTeamInfoT> OnControllableTeamInfoCallback = delegate { };
     public event Action<RenderingStatusT> OnRenderingStatusCallback = delegate { };
+    public event Action<ulong> OnPingResponse = delegate { };
     public event Action<CorePacketT> OnAnyMessageCallback = delegate { };
 
     public RLBotInterface(int connectionTimeout = 120)
@@ -120,6 +121,16 @@ public class RLBotInterface
     public void SendRemoveRenderGroup(RemoveRenderGroupT removeRenderGroup)
     {
         SendFlatBuffer(InterfaceMessageUnion.FromRemoveRenderGroup(removeRenderGroup));
+    }
+
+    /// <summary>
+    /// Send ping request to the RLBotServer.
+    /// Subscribe to OnPingResponse to listen for response.
+    /// </summary>
+    public void SendPingRequest(ulong cookie)
+    {
+        var request = InterfaceMessageUnion.FromPingRequest(new PingRequestT { Cookie = cookie });
+        SendFlatBuffer(request);
     }
 
     public void StopMatch(bool shutdownServer = false)
@@ -376,6 +387,15 @@ public class RLBotInterface
             case CoreMessage.RenderingStatus:
                 RenderingStatusT renderingStatus = packet.Message.AsRenderingStatus();
                 OnRenderingStatusCallback(renderingStatus);
+                break;
+            case CoreMessage.PingRequest:
+                PingRequestT pingRequest = packet.Message.AsPingRequest();
+                var response = new PingResponseT { Cookie = pingRequest.Cookie };
+                SendFlatBuffer(InterfaceMessageUnion.FromPingResponse(response));
+                break;
+            case CoreMessage.PingResponse:
+                PingResponseT pingResponse = packet.Message.AsPingResponse();
+                OnPingResponse(pingResponse.Cookie);
                 break;
             default:
                 _logger.LogWarning(
